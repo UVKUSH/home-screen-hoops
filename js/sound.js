@@ -192,6 +192,23 @@ export function ignite() {
   osc.stop(t + 0.5);
 }
 
+// ── you became a star ─────────────────────────────────────────
+export function star() {
+  if (!ctx) return;
+  const t = now();
+  // a rising major triad — short, bright, not a fanfare
+  [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const at = t + i * 0.075;
+    const g = envelope(0.2, 0.012, 0.34, at);
+    osc.connect(g).connect(master);
+    osc.start(at);
+    osc.stop(at + 0.42);
+  });
+}
+
 /** Routes a physics impact to the right noise. */
 export function impact(type, strength) {
   if (type === 'rim') clang(strength);

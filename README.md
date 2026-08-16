@@ -83,6 +83,9 @@ glows and the net warms up. Once you're lit you stay lit; it takes **three
 misses in a row** to put it out, so one unlucky rim-out doesn't end a hot streak.
 Both numbers are `fireAt` and `coolAfter` in [`config.js`](js/config.js).
 
+**Tap the UVY icon** (it's on both pages) for the star card — logo, a little
+rising chime, and *UVY · United Voice of Youth*.
+
 **The Clock and the Calendar tell the truth.** Real ticking hands, today's real
 date — exactly like iOS. They're drawn as live SVG rather than taken from the
 sprite, because hands baked into a picture can't move. It's the detail that

@@ -822,6 +822,80 @@ body.playing #hud { opacity: 1; }
 }
 #dials button.ghost { background: rgba(255,255,255,.1); color: #fff; }
 
+/* ── you became a star ────────────────────────────────────────── */
+#uvy {
+  position: fixed;
+  inset: 0;
+  z-index: 216;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2,10,24,.72);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+#uvy[hidden] { display: none; }
+
+#uvy .card {
+  width: min(320px, 84vw);
+  padding: 30px 24px 22px;
+  border-radius: 30px;
+  background: linear-gradient(#1d1d20, #131316);
+  border: 1px solid rgba(255,217,28,.28);
+  box-shadow: 0 0 60px rgba(255,217,28,.16);
+  text-align: center;
+  animation: star-in .5s cubic-bezier(.2,1.3,.4,1) both;
+}
+@keyframes star-in {
+  from { opacity: 0; transform: scale(.86) translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+#uvy .uvy-tile {
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 20px;
+  border-radius: 22.5%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(255,217,28,.4);
+  animation: star-bob 2.4s ease-in-out infinite;
+}
+#uvy .uvy-tile svg { width: 78%; height: 78%; display: block; }
+@keyframes star-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-7px) rotate(2deg); }
+}
+
+#uvy .uvy-title {
+  margin: 6px 0 8px;
+  font: 700 25px/1.15 -apple-system, system-ui, sans-serif;
+  color: #FFD91C;
+}
+#uvy .uvy-sub {
+  margin-bottom: 24px;
+  font: 500 13px/1.4 -apple-system, system-ui, sans-serif;
+  letter-spacing: .6px;
+  color: rgba(255,255,255,.62);
+}
+#uvy button {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 15px;
+  background: #FFD91C;
+  color: #16161a;
+  font: 700 16px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #uvy .card, #uvy .uvy-tile { animation: none; }
+}
+
 /* ── toast ────────────────────────────────────────────────────── */
 #toast {
   position: fixed;

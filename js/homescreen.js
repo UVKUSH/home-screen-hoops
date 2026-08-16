@@ -2,6 +2,7 @@ import { PAGES, DOCK } from './apps.js';
 import { COLS, ROWS, INDEX } from './sprite.js';
 import { LIVE_ICONS, liveArt, startLiveIcons } from './liveicons.js';
 import { countSettingsTap } from './dials.js';
+import { showUvy } from './uvy.js';
 
 // Basketball seams, drawn over the icon once it goes round.
 // viewBox is 0-100 so it scales to whatever the icon size is.
@@ -51,6 +52,7 @@ function makeIcon(app) {
     if (document.body.classList.contains('playing')) return;
     // seven taps on Settings opens the real dials
     if (app.id === 'settings' && countSettingsTap()) return;
+    if (app.id === 'uvy') { showUvy(); return; }
     el.classList.remove('nope');
     void el.offsetWidth;        // restart the animation
     el.classList.add('nope');
