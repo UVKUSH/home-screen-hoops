@@ -70,6 +70,27 @@ on — it removes the hard part of physics (two dozen balls resting on each othe
 without jittering or sinking) and reduces the engine to about a hundred lines.
 The resting pile is only simulated when tilt is switched on.
 
+## Sound
+
+There are no audio files. Every sound is synthesised in
+[`js/sound.js`](js/sound.js) with the Web Audio API — a filtered noise burst for
+the net, inharmonic sine partials for the rim, a pitched thud for bounces.
+
+That's not just to save bytes. **A synthesised impact can be shaped by the
+physics.** `stepBall` records what the ball hit and how fast, so a graze off the
+rim and a full-force clang come out genuinely different, and a ball dribbling to
+a stop gets quieter and higher-pitched with each bounce the way a real one does.
+A recorded sample can't do that.
+
+What you hear: a dribble thud while you hold Search, a deep thump as the phone
+breaks, the cascade of two dozen balls hitting the floor, a whoosh on release,
+iron on the rim, and nylon through the net. No music, no crowd, and nothing at
+all when you poke a fake icon — real phones don't beep at you.
+
+Audio can only start from a real tap, so it unlocks on the Spotlight press. **On
+iOS the ring/silent switch mutes all of it** and no web page can override that,
+which is probably right for something you hand to someone across a quiet table.
+
 ## The leaderboard
 
 When the last shot is gone you can **keep going**, or put your name up. Only the

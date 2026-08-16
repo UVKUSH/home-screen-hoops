@@ -31,6 +31,11 @@ export function stepBall(b, world, hoop, dt) {
   let event = null;
   const h = dt / SUBSTEPS;
 
+  // Impacts are recorded on the ball rather than played from here, so this
+  // module stays pure — it has to run in Node for the tests, where there is
+  // no audio at all. The caller reads b.hit after stepping.
+  b.hit = null;
+
   // Drag as "fraction of speed kept per SECOND", converted to this substep.
   // Multiplying by a flat constant each substep instead would make the game
   // play differently on a 120Hz phone than a 60Hz one — and the drag would be
@@ -51,10 +56,12 @@ export function stepBall(b, world, hoop, dt) {
     // side walls
     if (b.x - b.r < 0) {
       b.x = b.r;
+      noteHit(b, 'wall', Math.abs(b.vx));
       b.vx = -b.vx * TUNE.wallBounce;
       b.vrot = -b.vrot * 0.7;
     } else if (b.x + b.r > world.w) {
       b.x = world.w - b.r;
+      noteHit(b, 'wall', Math.abs(b.vx));
       b.vx = -b.vx * TUNE.wallBounce;
       b.vrot = -b.vrot * 0.7;
     }
@@ -78,6 +85,7 @@ export function stepBall(b, world, hoop, dt) {
       b.y = world.floor - b.r;
 
       if (b.vy > REST_SPEED) {
+        noteHit(b, 'floor', b.vy);
         b.vy = -b.vy * TUNE.floorBounce;  // a real bounce
         b.vx *= 0.9;                      // scrub a little speed on impact
       } else {
@@ -135,10 +143,16 @@ function hitPost(b, px, py, postR) {
 
   const vn = b.vx * nx + b.vy * ny;
   if (vn < 0) {
+    noteHit(b, 'rim', -vn);
     b.vx -= (1 + TUNE.rimBounce) * vn * nx;
     b.vy -= (1 + TUNE.rimBounce) * vn * ny;
     b.vrot += -vn * 0.02;
   }
+}
+
+/** Several substeps can collide; only the hardest one is worth hearing. */
+function noteHit(b, type, speed) {
+  if (!b.hit || speed > b.hit.speed) b.hit = { type, speed };
 }
 
 /**

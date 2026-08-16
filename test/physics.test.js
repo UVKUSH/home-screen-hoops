@@ -141,6 +141,51 @@ test('a flick aimed with timeToRim actually goes in', () => {
   assert.ok(events.includes('score'), 'a perfectly-led shot should drop through');
 });
 
+// The sound layer reads b.hit after every step, so the physics has to report
+// impacts even though it knows nothing about audio.
+test('a floor bounce is reported, and scaled by how hard it landed', () => {
+  const w = world();
+  // step until each one actually reaches the floor — one frame at 200px/s
+  // doesn't cover the gap
+  const land = (vy) => {
+    const b = makeBall(null, 180, w.floor - 31 - 5, 31);
+    b.vy = vy;
+    for (let i = 0; i < 30; i++) {
+      stepBall(b, w, null, DT);
+      if (b.hit) return b.hit;
+    }
+    return null;
+  };
+
+  const soft = land(200);
+  const hard = land(1600);
+
+  assert.equal(soft?.type, 'floor');
+  assert.equal(hard?.type, 'floor');
+  assert.ok(hard.speed > soft.speed * 3, 'a harder landing must report louder');
+});
+
+test('a rim clang is reported as a rim hit, not a floor one', () => {
+  const w = world();
+  const b = makeBall(null, hoop.x + hoop.rimHalf + 14, hoop.y - 90, 31);
+  b.vy = 400;
+
+  let seen = null;
+  for (let i = 0; i < 60 && !seen; i++) {
+    stepBall(b, w, hoop, DT);
+    if (b.hit) seen = b.hit;
+  }
+  assert.equal(seen?.type, 'rim');
+  assert.ok(seen.speed > 0);
+});
+
+test('a ball floating in mid-air reports no impact', () => {
+  const w = world();
+  const b = makeBall(null, 180, 200, 31);
+  stepBall(b, w, null, DT);
+  assert.equal(b.hit, null);
+});
+
 test('overlapping balls get pushed apart', () => {
   const a = makeBall(null, 100, 100, 31);
   const b = makeBall(null, 110, 100, 31);   // badly overlapping

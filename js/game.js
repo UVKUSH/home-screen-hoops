@@ -5,6 +5,7 @@ import { toBalls, homeAgain } from './transform.js';
 import { resetSpotlight } from './longpress.js';
 import { createTilt } from './tilt.js';
 import { createScorecard } from './leaderboard.js';
+import * as sound from './sound.js';
 
 // Where the loaded ball waits. Kept above the pile so the ball you're about to
 // shoot is never buried in it, and pushed to the RIGHT so there's real diagonal
@@ -14,6 +15,9 @@ import { createScorecard } from './leaderboard.js';
 const LAUNCH_X   = 0.76;
 const LAUNCH_Y   = 0.68;
 const DRAG_LIMIT = 0.42;  // you can't drag the ball higher than this — no cheating
+// impact speed -> 0..1 loudness. A ball dropped from the top of the screen
+// lands at roughly 2 screen-heights per second, which is the ceiling.
+const LOUDEST    = 2.0;
 const SAMPLE_MS  = 80;    // flick speed is measured over the last 80ms only.
                           // people slow down before lifting a finger; using the
                           // whole gesture makes every shot feel weak.
@@ -54,6 +58,7 @@ export function createGame() {
     world = createWorld();
     balls = toBalls(world, origin);
     total = balls.length;          // one shot per icon that just turned into a ball
+    sound.thump();
     document.body.classList.add('morphing');
     document.getElementById('court').removeAttribute('inert');
     document.getElementById('home').setAttribute('inert', '');
@@ -158,6 +163,8 @@ export function createGame() {
     loaded.shot = true;
     loaded.el.classList.remove('loaded');
 
+    sound.whoosh(speed / (world.h * LOUDEST));
+
     active = loaded;
     loaded = null;
     shotT = 0;
@@ -188,6 +195,7 @@ export function createGame() {
       for (const b of balls) {
         if (b.hold > 0) { b.hold -= dt; continue; }
         stepBall(b, world, null, dt);
+        playHit(b);
       }
       separate(balls);
       balls.forEach(render);
@@ -206,6 +214,7 @@ export function createGame() {
         for (const b of loose) {
           b.asleep = false;
           stepBall(b, world, null, dt);
+          playHit(b);
         }
         separate(loose);
       }
@@ -224,12 +233,18 @@ export function createGame() {
       if (active) {
         shotT += dt;
         const ev = stepBall(active, world, hoop, dt);
+        playHit(active);
         if (ev === 'score') onScore();
         if (shotOver()) endShot();
       }
 
       balls.forEach(render);
     }
+  }
+
+  /** Turn whatever the ball just hit into a noise. */
+  function playHit(b) {
+    if (b.hit) sound.impact(b.hit.type, b.hit.speed / (world.h * LOUDEST));
   }
 
   function shotOver() {
@@ -242,6 +257,7 @@ export function createGame() {
 
   function onScore() {
     score++;
+    sound.swish();
     hoop.swish();
     navigator.vibrate?.(18);
     flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
@@ -332,6 +348,7 @@ export function createGame() {
     get shots() { return shots; },
     get hoop() { return hoop; },
     get world() { return world; },
+    get audioReady() { return sound.ready(); },
     /** Jump straight to the scorecard. Only reachable via ?debug. */
     forceFinish(fakeScore = score) { score = fakeScore; finish(); },
   };
