@@ -69,7 +69,12 @@ export function createHoop(world, ballR) {
       if (over > 0) {
         const ramp = Math.min(1 + over * TUNE.hoopRamp, TUNE.hoopRampMax);
         this.t += dt * TUNE.hoopSpeed * ramp;
-        this.x = minX + ((1 - Math.cos(this.t)) / 2) * (maxX - minX) * TUNE.hoopRange;
+
+        // The sweep widens as the game goes on: a short wobble at first, the
+        // full width later. Both how FAR it goes and how FAST it goes ramp up.
+        const grow = Math.min(TUNE.hoopGrowFrom + (over - 1) * TUNE.hoopGrow, 1);
+        const span = (maxX - minX) * TUNE.hoopRange * grow;
+        this.x = minX + ((1 - Math.cos(this.t)) / 2) * span;
       } else {
         this.x = minX;
       }

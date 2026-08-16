@@ -39,10 +39,15 @@ export const TUNE = {
   hoopRampMax: 2.5,  // ...but never more than this multiple of hoopSpeed.
                      // Without a ceiling the ramp compounds over 24 shots and
                      // the hoop ends up crossing the screen in a blink
-  hoopRange:  1.00,  // fraction of the screen width it sweeps. 1 = corner to
-                     // corner. Note that when the hoop passes over the launch
-                     // corner, a straight-up flick will drop back through it —
-                     // lower this to about 0.7 if that feels too cheap.
+  hoopRange:  1.00,  // widest it ever sweeps. 1 = corner to corner. Note that
+                     // when the hoop passes over the launch corner, a straight-up
+                     // flick will drop back through it — lower this to about 0.7
+                     // if that feels too cheap
+  hoopGrowFrom: 0.30, // how wide the sweep is on the very first moving shot.
+                      // Starting near 0 is technically progressive but reads as
+                      // "the hoop isn't moving", so it opens at a visible third
+  hoopGrow:   0.09,   // extra width unlocked per shot after that, reaching the
+                      // full corner-to-corner sweep around shot 11
 };
 
 // Ranks shown on the scorecard, checked from the top down. Kept as fractions
