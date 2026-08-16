@@ -1,0 +1,468 @@
+/* ── base ─────────────────────────────────────────────────── */
+:root {
+  --icon: 62px;
+  --gap-x: 26px;
+  --gap-y: 20px;
+  --label: 11px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #000;
+  font: 400 16px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img { -webkit-user-drag: none; user-drag: none; }
+
+/* ── wallpaper ────────────────────────────────────────────── */
+#wallpaper {
+  position: fixed;
+  inset: 0;
+  background: #0b3f6b url("../assets/wallpaper.jpg") center / cover no-repeat;
+  transition: filter .5s ease, transform .5s ease;
+}
+body.playing #wallpaper { filter: brightness(.42) saturate(.7); transform: scale(1.06); }
+
+/* ── home screen shell ────────────────────────────────────── */
+#home {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-t) + 6px) 0 calc(var(--safe-b) + 8px);
+  transition: opacity .35s ease;
+}
+body.playing #home { pointer-events: none; }
+body.playing #statusbar,
+body.playing #dots,
+body.playing #dock { opacity: 0; }
+
+/* ── status bar ───────────────────────────────────────────── */
+#statusbar {
+  flex: none;
+  height: 22px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 600 15px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: .1px;
+  transition: opacity .3s ease;
+}
+.status-right { display: flex; align-items: center; gap: 5px; }
+.status-right svg { display: block; }
+
+/* ── icon grid ────────────────────────────────────────────── */
+#pages {
+  flex: 1;
+  overflow: hidden;
+}
+#track {
+  display: flex;
+  height: 100%;
+  transition: transform .34s cubic-bezier(.32,.9,.3,1);
+  will-change: transform;
+}
+.page {
+  flex: 0 0 100%;
+  display: grid;
+  grid-template-columns: repeat(4, var(--icon));
+  grid-auto-rows: min-content;
+  justify-content: center;
+  align-content: start;
+  column-gap: var(--gap-x);
+  row-gap: var(--gap-y);
+  padding-top: 22px;
+}
+
+.app {
+  width: var(--icon);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.app .art {
+  position: relative;
+  width: var(--icon);
+  height: var(--icon);
+  border-radius: 22.5%;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  /* morph to a ball is a transition on these two */
+  transition: border-radius .45s cubic-bezier(.5,0,.2,1),
+              box-shadow .45s ease;
+}
+.app .art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.app .seams {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .4s ease .1s;
+  pointer-events: none;
+}
+.app .seams svg { width: 100%; height: 100%; display: block; }
+
+.app .name {
+  font-size: var(--label);
+  line-height: 1.15;
+  letter-spacing: .1px;
+  /* the wallpaper has a pale band across the middle, so labels need a
+     real shadow rather than a hint of one to stay readable */
+  text-shadow: 0 1px 3px rgba(0,0,0,.75), 0 0 10px rgba(0,0,0,.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: opacity .25s ease;
+}
+
+.app.nope { animation: nope .4s ease; }
+@keyframes nope {
+  0%,100% { transform: translateX(0) }
+  25% { transform: translateX(-4px) rotate(-2deg) }
+  75% { transform: translateX(4px) rotate(2deg) }
+}
+
+/* ── page dots ────────────────────────────────────────────── */
+#dots {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 0 14px;
+  transition: opacity .3s ease;
+}
+#dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.32); }
+#dots i.on { background: #fff; }
+
+/* ── spotlight pill ───────────────────────────────────────── */
+#spotlight {
+  flex: none;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 16px;
+  padding: 8px 15px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  color: #fff;
+  font: 500 15px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease;
+}
+/* the "tell" while you hold it — a dribble */
+#spotlight.charging { animation: dribble .42s cubic-bezier(.4,0,.5,1) infinite; background: rgba(255,255,255,.3); }
+@keyframes dribble {
+  0%   { transform: translateY(0) scaleY(1) }
+  45%  { transform: translateY(-9px) scaleY(1.04) }
+  85%  { transform: translateY(0) scaleY(.82) }
+  100% { transform: translateY(0) scaleY(1) }
+}
+#spotlight.pop { transform: scale(1.5); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+body.playing #spotlight { opacity: 0; pointer-events: none; }
+
+/* ── dock ─────────────────────────────────────────────────── */
+#dock {
+  flex: none;
+  margin: 0 10px;
+  padding: 10px 0;
+  border-radius: 34px;
+  background: rgba(255,255,255,.14);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  transition: opacity .3s ease;
+}
+#dock-icons {
+  display: grid;
+  grid-template-columns: repeat(4, var(--icon));
+  justify-content: center;
+  column-gap: var(--gap-x);
+}
+#dock .name { display: none; }
+
+/* ── home indicator ───────────────────────────────────────── */
+#homebar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 7px);
+  width: 134px;
+  height: 5px;
+  margin-left: -67px;
+  border-radius: 3px;
+  background: rgba(255,255,255,.55);
+  z-index: 90;
+  pointer-events: none;
+}
+
+/* ── court ────────────────────────────────────────────────── */
+#court {
+  position: fixed;
+  inset: 0;
+  visibility: hidden;
+  z-index: 20;
+}
+body.playing #court, body.morphing #court { visibility: visible; }
+
+.layer { position: absolute; inset: 0; pointer-events: none; }
+#hoop-back  { z-index: 1; }
+#balls      { z-index: 2; }
+#hoop-front { z-index: 3; }
+
+/* a ball is just an .app that left the grid */
+.app.ball {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--icon);
+  height: var(--icon);
+  gap: 0;
+  will-change: transform;
+}
+.app.ball .name { opacity: 0; position: absolute; }
+.app.ball .art {
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(0,0,0,.5), inset -6px -8px 14px rgba(0,0,0,.35);
+}
+.app.ball .seams { opacity: 1; }
+
+/* flying back to the grid — un-rounds and drops the seams on the way */
+.app.ball.unmorph .art {
+  border-radius: 22.5%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35);
+}
+.app.ball.unmorph .seams { opacity: 0; transition: opacity .3s ease; }
+
+/* ── the ball waiting to be flicked ───────────────────────────
+   It has to be unmistakable: it sits ON TOP of the pile rather than
+   inside it, it's bigger, it glows, and it wears a pulsing ring. */
+.app.ball.loaded { z-index: 9; }
+
+.app.ball.loaded .art {
+  transform: scale(1.1);
+  box-shadow: 0 10px 26px rgba(0,0,0,.65),
+              inset -6px -8px 14px rgba(0,0,0,.35),
+              0 0 22px 4px rgba(255,159,10,.55);
+}
+
+.app.ball.loaded::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,.95);
+  animation: ready 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes ready {
+  0%, 100% { transform: scale(1);    opacity: .95 }
+  50%      { transform: scale(1.14); opacity: .35 }
+}
+
+/* little "flick me up" nudge, only until the first shot goes up */
+#hint {
+  position: absolute;
+  left: 50%;
+  z-index: 8;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: 600 11px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.75);
+  text-shadow: 0 1px 6px rgba(0,0,0,.8);
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+#hint.show { opacity: 1; animation: nudge 1.6s ease-in-out infinite; }
+@keyframes nudge {
+  0%, 100% { transform: translate(-50%, 0) }
+  50%      { transform: translate(-50%, -9px) }
+}
+
+/* ── hoop ─────────────────────────────────────────────────── */
+.hoop-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  will-change: transform;
+}
+/* the whole hoop layer swings in from above; the svg inside it is driven
+   per-frame by the physics, so the two transforms never fight */
+#hoop-back, #hoop-front {
+  transform: translate3d(0, -62vh, 0);
+  transition: transform .85s cubic-bezier(.3,1.45,.5,1);
+}
+body.hoop-in #hoop-back,
+body.hoop-in #hoop-front { transform: translate3d(0, 0, 0); }
+
+.net { transform-origin: 50% 0; }
+.net.swish { animation: swish .45s cubic-bezier(.3,1.4,.5,1); }
+@keyframes swish {
+  0%   { transform: scaleY(1) }
+  35%  { transform: scaleY(1.35) }
+  100% { transform: scaleY(1) }
+}
+
+/* ── HUD ──────────────────────────────────────────────────── */
+#hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--safe-t) + 14px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity .4s ease .3s;
+}
+body.playing #hud { opacity: 1; }
+#hud b {
+  font: 700 42px/1 -apple-system, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 12px rgba(0,0,0,.6);
+}
+#hud span {
+  font: 500 12px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+#hud.pop b { animation: pop .35s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.32)} 100%{transform:scale(1)} }
+
+/* ── tilt opt-in chip (iOS only — see tilt.js) ────────────────── */
+#tilt {
+  position: absolute;
+  right: 14px;
+  top: calc(var(--safe-t) + 20px);
+  z-index: 6;
+  padding: 7px 13px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  font: 600 12px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: .6px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+#tilt.show { opacity: 1; pointer-events: auto; }
+
+#flash {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 28%, rgba(255,159,10,.55), transparent 62%);
+}
+#flash.on { animation: flash .5s ease-out; }
+@keyframes flash { 0%{opacity:0} 15%{opacity:1} 100%{opacity:0} }
+
+/* ── scorecard ────────────────────────────────────────────── */
+#scorecard {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.55);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+#scorecard.show { opacity: 1; pointer-events: auto; }
+
+#scorecard .card {
+  width: min(300px, 78vw);
+  padding: 30px 24px 22px;
+  border-radius: 28px;
+  background: rgba(28,28,30,.9);
+  border: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+}
+.eyebrow {
+  font: 600 11px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+.tally { margin: 10px 0 2px; display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.tally b { font: 700 66px/1 -apple-system, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.tally span { font: 500 20px/1 -apple-system, system-ui, sans-serif; color: rgba(255,255,255,.4); }
+.rank {
+  margin-bottom: 24px;
+  font: 600 19px/1 -apple-system, system-ui, sans-serif;
+  color: #ff9f0a;
+}
+#scorecard button {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 13px;
+  border: 0;
+  border-radius: 15px;
+  background: #ff9f0a;
+  color: #1c1c1e;
+  font: 600 16px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+#scorecard button.ghost { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── small screens ────────────────────────────────────────── */
+@media (max-height: 700px) {
+  :root { --icon: 56px; --gap-y: 14px; }
+  .page { padding-top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #spotlight.charging { animation: none; background: rgba(255,255,255,.34); }
+}

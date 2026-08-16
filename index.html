@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Home</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/safari.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="wallpaper"></div>
+
+<!-- ── the fake home screen ───────────────────────────────── -->
+<div id="home">
+  <div id="statusbar">
+    <span id="clock">9:41</span>
+    <span class="status-right">
+      <svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor">
+        <rect x="0"  y="8" width="3" height="4" rx="1"/>
+        <rect x="5"  y="5.5" width="3" height="6.5" rx="1"/>
+        <rect x="10" y="3" width="3" height="9" rx="1"/>
+        <rect x="15" y="0" width="3" height="12" rx="1"/>
+      </g></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true"><g fill="currentColor">
+        <path d="M8.5 11.6 6.1 9.1a3.4 3.4 0 0 1 4.8 0z"/>
+        <path d="M8.5 6.2c1.5 0 2.9.6 4 1.6l1.6-1.7A8 8 0 0 0 8.5 3.9a8 8 0 0 0-5.6 2.2l1.6 1.7a5.8 5.8 0 0 1 4-1.6z"/>
+        <path d="M8.5 1.6c2.7 0 5.2 1 7.1 2.8L17 2.8A11.9 11.9 0 0 0 8.5 0 11.9 11.9 0 0 0 0 2.8l1.4 1.6A10.2 10.2 0 0 1 8.5 1.6z"/>
+      </g></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true">
+        <rect x="0.5" y="0.5" width="22" height="12" rx="3.8" fill="none" stroke="currentColor" stroke-opacity=".4"/>
+        <rect x="2" y="2" width="16" height="9" rx="2.2" fill="currentColor"/>
+        <path d="M24.5 4.3v4.4a2.3 2.3 0 0 0 0-4.4z" fill="currentColor" fill-opacity=".45"/>
+      </svg>
+    </span>
+  </div>
+
+  <div id="pages"><div id="track"></div></div>
+
+  <div id="dots"></div>
+
+  <button id="spotlight" type="button">
+    <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="6.8" cy="6.8" r="5.2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M10.7 10.7 15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Search</span>
+  </button>
+
+  <div id="dock"><div id="dock-icons"></div></div>
+</div>
+
+<!-- ── the game ───────────────────────────────────────────── -->
+<!-- `inert` (not aria-hidden) so the buttons inside can't be focused or read
+     while the court is put away — aria-hidden alone leaves them tabbable -->
+<div id="court" inert>
+  <div class="layer" id="hoop-back"></div>
+  <div class="layer" id="balls"></div>
+  <div class="layer" id="hoop-front"></div>
+
+  <div id="hint"><svg width="15" height="9" viewBox="0 0 15 9" aria-hidden="true"><path d="M1.5 7.5 7.5 1.5l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Flick up</span></div>
+
+  <div id="hud"><b id="hud-score">0</b><span id="hud-shots">24 left</span></div>
+  <button id="tilt" type="button">Tilt</button>
+  <div id="flash"></div>
+
+  <div id="scorecard">
+    <div class="card">
+      <p class="eyebrow">Final</p>
+      <p class="tally"><b id="final-score">0</b><span id="final-total">/ 24</span></p>
+      <p class="rank" id="final-rank">Airball</p>
+      <button id="again" type="button">Run it back</button>
+      <button id="quit" type="button" class="ghost">Go home</button>
+    </div>
+  </div>
+</div>
+
+<div id="homebar"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

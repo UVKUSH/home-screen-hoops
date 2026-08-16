@@ -1,0 +1,11 @@
+{
+  "name": "hoops",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A fake iPhone home screen that turns into a basketball game.",
+  "scripts": {
+    "test": "node --test test/",
+    "start": "python3 -m http.server 8765"
+  }
+}

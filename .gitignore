@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+
+# the untouched originals — the web-ready copies live in assets/
+assest/
