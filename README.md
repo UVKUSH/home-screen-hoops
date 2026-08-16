@@ -192,8 +192,14 @@ repack the sprite:
 npm run build
 ```
 
-That regenerates `assets/sprite.webp` and `js/sprite.js`. Nothing else is built —
-the page runs straight from source.
+That regenerates `assets/sprite.webp` and `js/sprite.js`, and redraws the
+home-screen icons from [`tools/make-icon.py`](tools/make-icon.py). Nothing else
+is built — the page runs straight from source.
+
+The icon is the UVY mark drawn with Pillow rather than exported from the SVG:
+there's no SVG rasteriser on this machine, and it's drawn at 8x then shrunk,
+because Pillow has no antialiasing of its own. On a white background, since iOS
+composites any transparency onto black.
 
 ## Why it loads fast
 

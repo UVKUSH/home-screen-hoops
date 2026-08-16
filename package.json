@@ -7,6 +7,6 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "start": "python3 tools/serve.py",
-    "build": "python3 tools/build-sprite.py"
+    "build": "python3 tools/build-sprite.py && python3 tools/make-icon.py"
   }
 }
