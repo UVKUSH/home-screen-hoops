@@ -2,6 +2,11 @@ import { leaderboardOn, fetchTop, submitScore } from './api.js';
 
 const SHARE_TEXT = 'Hold down the Search bar on this and watch what happens 🏀';
 
+const SHARE_URL = () => location.origin + location.pathname;
+
+// X gets its own wording — reusing the share text put the basketball in twice
+const X_TAGLINE = 'Hold down the Search bar and watch the phone fall apart.';
+
 // Tap-to-finish email endings. Typing "@gmail.com" on a phone keyboard is a
 // lot of taps for something almost everyone picks from the same short list.
 const DOMAINS = ['@gmail.com', '@icloud.com', '@outlook.com', '@yahoo.com', '@hotmail.com'];
@@ -146,6 +151,20 @@ export function createScorecard({ onAgain, onHome }) {
   }
 
   document.getElementById('share').addEventListener('click', shareIt);
+
+  // X opens in a new tab rather than replacing the game — on a home-screen web
+  // app that would otherwise dump the player out into Safari and lose the round
+  for (const btn of root.querySelectorAll('[data-share-x]')) {
+    btn.addEventListener('click', () => {
+      const text = last.total
+        ? `I scored ${last.score}/${last.total} on Home Screen Hoops 🏀\n\n${X_TAGLINE}`
+        : `Home Screen Hoops 🏀\n\n${X_TAGLINE}`;
+      const url = 'https://x.com/intent/post'
+        + `?text=${encodeURIComponent(text)}`
+        + `&url=${encodeURIComponent(SHARE_URL())}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
   document.getElementById('again2').addEventListener('click', () => { close(); onAgain(); });
   document.getElementById('quit2').addEventListener('click', () => { close(); onHome(); });
   document.getElementById('again').addEventListener('click', () => { close(); onAgain(); });
@@ -156,7 +175,7 @@ export function createScorecard({ onAgain, onHome }) {
 
 // ── share ───────────────────────────────────────────────────────
 async function shareIt() {
-  const url = location.origin + location.pathname;
+  const url = SHARE_URL();
   if (navigator.share) {
     try {
       await navigator.share({ title: 'Home Screen Hoops', text: SHARE_TEXT, url });

@@ -584,6 +584,22 @@ body.playing #hud { opacity: 1; }
 }
 #scorecard button.ghost { background: rgba(255,255,255,.1); color: #fff; }
 
+#scorecard button.x-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.22);
+}
+#scorecard button.x-share svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  flex: none;
+}
+
 #scorecard button.link,
 #install button.link {
   margin-top: 16px;

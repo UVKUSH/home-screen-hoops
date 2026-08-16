@@ -6,7 +6,7 @@
   "description": "A fake iPhone home screen that turns into a basketball game.",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "start": "python3 -m http.server 8765",
+    "start": "python3 tools/serve.py",
     "build": "python3 tools/build-sprite.py"
   }
 }

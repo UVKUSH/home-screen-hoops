@@ -17,8 +17,13 @@ browser bars at all, which is most of the joke.
 To run it locally:
 
 ```bash
-python3 -m http.server 8765
+npm start
 ```
+
+That's `tools/serve.py`, which serves with `no-store`. Plain
+`python -m http.server` sends no cache headers at all, so browsers apply
+heuristic freshness and quietly reuse an ES module you edited seconds ago —
+you reload, see no change, and go hunting for a bug that isn't there.
 
 ## How to play
 
@@ -137,7 +142,8 @@ which is probably right for something you hand to someone across a quiet table.
 
 ## The leaderboard
 
-When the last shot is gone you can **keep going**, or put your name up. Only the
+When the last shot is gone you can **keep going**, share the score **on X**, or
+put your name up. Only the
 name appears on the board — the email or phone is stored privately and no API
 route ever reads it back out.
 
