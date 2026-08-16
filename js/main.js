@@ -1,8 +1,9 @@
 import { buildHomeScreen } from './homescreen.js';
 import { watchSpotlight } from './longpress.js';
 import { createGame } from './game.js';
+import { TUNE } from './config.js';
 import { runSplash } from './splash.js';
-import { wireInstallHelp } from './leaderboard.js';
+import { wireInstallHelp, maybeShowInstall } from './install.js';
 
 const EXIT_STRIP = 26; // bottom edge zone reserved for the iOS-style home swipe
 const EXIT_PULL  = 55; // how far up you drag it to bail out
@@ -43,6 +44,8 @@ addEventListener('pointerup', letGo, { passive: true });
 addEventListener('pointercancel', letGo, { passive: true });
 
 wireInstallHelp();
+// first visit only, and after the splash so the two don't collide
+maybeShowInstall({ delay: TUNE.splashMs + 700 });
 
 // stop Safari's own gestures from stealing the show
 addEventListener('contextmenu', (e) => e.preventDefault());

@@ -12,7 +12,11 @@ the grid, like nothing happened.
 **→ [uvkush.github.io/home-screen-hoops](https://uvkush.github.io/home-screen-hoops/)**
 
 Open it on a phone, then **Share → Add to Home Screen**. It launches with no
-browser bars at all, which is most of the joke.
+browser bars at all, which is most of the joke — so on a first visit the app
+offers to walk you through it, with instructions matched to the browser you're
+actually in (iOS Safari, iOS Chrome, Android Chrome, Samsung Internet, Firefox,
+or desktop). Where the browser supports it, that becomes a single **Install**
+button instead. Shown once, never again.
 
 To run it locally:
 

@@ -206,21 +206,6 @@ function toast(text) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
-// ── add to home screen ──────────────────────────────────────────
-export function wireInstallHelp() {
-  const panel = document.getElementById('install');
-  const open = () => { panel.hidden = false; };
-  const close = () => { panel.hidden = true; };
-
-  for (const btn of document.querySelectorAll('[data-install]')) {
-    // pointless advice if they're already running it from the home screen
-    btn.hidden = document.body.classList.contains('standalone');
-    btn.addEventListener('click', open);
-  }
-  panel.querySelector('[data-close-install]').addEventListener('click', close);
-  panel.addEventListener('click', (e) => { if (e.target === panel) close(); });
-}
-
 // ── shared with the server, deliberately loose ──────────────────
 function looksLikeEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);

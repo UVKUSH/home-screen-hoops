@@ -727,7 +727,7 @@ body.playing #hud { opacity: 1; }
   font-variant-numeric: tabular-nums;
 }
 
-/* ── add to home screen ───────────────────────────────────────── */
+/* ── add to home screen ─────────────────────────────────────── */
 #install {
   position: fixed;
   inset: 0;
@@ -735,34 +735,53 @@ body.playing #hud { opacity: 1; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.66);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
+  animation: fade-in .35s ease both;
 }
 #install[hidden] { display: none; }
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+
 #install .card {
-  width: min(320px, 82vw);
-  padding: 28px 24px 22px;
+  width: min(330px, 86vw);
+  padding: 28px 24px 20px;
   border-radius: 28px;
-  background: rgba(28,28,30,.94);
+  background: rgba(28,28,30,.96);
   border: 1px solid rgba(255,255,255,.1);
   text-align: center;
+  animation: card-in .45s cubic-bezier(.2,1.2,.4,1) both;
 }
-.steps {
-  margin: 0 0 22px;
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px) scale(.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+#install .lead {
+  margin: 6px 0 20px;
+  font: 400 14px/1.45 -apple-system, system-ui, sans-serif;
+  color: rgba(255,255,255,.62);
+}
+
+#install .steps {
+  margin: 0 0 20px;
   padding: 0;
   list-style: none;
   text-align: left;
 }
-.steps li {
+#install .steps li {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 11px;
-  margin-bottom: 15px;
-  font: 400 14px/1.45 -apple-system, system-ui, sans-serif;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border-radius: 15px;
+  background: rgba(255,255,255,.06);
+  font: 400 14px/1.35 -apple-system, system-ui, sans-serif;
   color: rgba(255,255,255,.82);
 }
-.steps .n {
+#install .steps b { color: #fff; font-weight: 600; }
+#install .steps .n {
   flex: none;
   width: 21px;
   height: 21px;
@@ -772,74 +791,16 @@ body.playing #hud { opacity: 1; }
   font: 700 12px/21px -apple-system, system-ui, sans-serif;
   text-align: center;
 }
-.steps b { color: #fff; }
-.ios-share {
-  vertical-align: -4px;
-  margin: 0 1px;
+/* the browser's own glyph, so there's no guessing which button they mean */
+#install .step-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
   color: #0a84ff;
 }
+#install .step-icon svg { width: 100%; height: 100%; display: block; }
+
 #install button {
-  display: block;
-  width: 100%;
-  padding: 13px;
-  border: 0;
-  border-radius: 15px;
-  background: #ff9f0a;
-  color: #1c1c1e;
-  font: 600 16px/1 -apple-system, system-ui, sans-serif;
-  cursor: pointer;
-}
-
-/* ── the hidden dials ─────────────────────────────────────────── */
-#dials {
-  position: fixed;
-  inset: 0;
-  z-index: 215;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,.62);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-}
-#dials[hidden] { display: none; }
-#dials .card {
-  width: min(330px, 86vw);
-  max-height: 82dvh;
-  overflow-y: auto;
-  padding: 26px 22px 20px;
-  border-radius: 28px;
-  background: rgba(28,28,30,.95);
-  border: 1px solid rgba(255,255,255,.1);
-  text-align: center;
-}
-#dials .rows { margin: 6px 0 20px; }
-
-.dial {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 2px 8px;
-  margin-bottom: 14px;
-  text-align: left;
-}
-.dial-name {
-  font: 500 14px/1 -apple-system, system-ui, sans-serif;
-  color: rgba(255,255,255,.85);
-}
-.dial-val {
-  font: 600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  color: #ff9f0a;
-}
-.dial input[type=range] {
-  grid-column: 1 / -1;
-  width: 100%;
-  margin-top: 7px;
-  accent-color: #ff9f0a;
-  touch-action: auto;
-}
-#dials button {
   display: block;
   width: 100%;
   margin-top: 9px;
@@ -851,101 +812,29 @@ body.playing #hud { opacity: 1; }
   font: 600 16px/1 -apple-system, system-ui, sans-serif;
   cursor: pointer;
 }
-#dials button.ghost { background: rgba(255,255,255,.1); color: #fff; }
+#install button.ghost { background: rgba(255,255,255,.1); color: #fff; }
 
-/* ── you became a star ────────────────────────────────────────── */
-#uvy {
-  position: fixed;
-  inset: 0;
-  z-index: 216;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2,10,24,.72);
-  -webkit-backdrop-filter: blur(22px);
-  backdrop-filter: blur(22px);
+/* Safari's Share button really is down there, so point at it */
+#install .point-down {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 8px);
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  color: rgba(255,255,255,.9);
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,.7));
+  animation: point 1.4s ease-in-out infinite;
+  pointer-events: none;
 }
-#uvy[hidden] { display: none; }
-
-#uvy .card {
-  width: min(320px, 84vw);
-  padding: 30px 24px 22px;
-  border-radius: 30px;
-  background: linear-gradient(#1d1d20, #131316);
-  border: 1px solid rgba(255,217,28,.28);
-  box-shadow: 0 0 60px rgba(255,217,28,.16);
-  text-align: center;
-  animation: star-in .5s cubic-bezier(.2,1.3,.4,1) both;
-}
-@keyframes star-in {
-  from { opacity: 0; transform: scale(.86) translateY(14px); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* the real app icon, straight from the sprite the home screen uses */
-#uvy .uvy-icon {
-  width: 104px;
-  height: 104px;
-  margin: 0 auto 22px;
-  border-radius: 22.5%;
-  background-image: url("../assets/sprite.webp");
-  background-repeat: no-repeat;
-  box-shadow: 0 12px 30px rgba(0,0,0,.5);
-  animation: star-bob 2.4s ease-in-out infinite;
-}
-@keyframes star-bob {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50%      { transform: translateY(-7px) rotate(2deg); }
-}
-
-#uvy .uvy-title {
-  margin: 0 0 10px;
-  font: 700 24px/1.2 -apple-system, system-ui, sans-serif;
-  color: #FFD91C;
-}
-#uvy .uvy-sub {
-  margin-bottom: 20px;
-  font: 500 13px/1.4 -apple-system, system-ui, sans-serif;
-  letter-spacing: .7px;
-  color: rgba(255,255,255,.6);
-}
-/* one secret pointing at the next */
-#uvy .uvy-hint {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 22px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255,255,255,.1);
-  font: 500 13px/1.35 -apple-system, system-ui, sans-serif;
-  color: rgba(255,255,255,.55);
-  text-align: left;
-}
-#uvy .uvy-hint b { color: rgba(255,255,255,.9); font-weight: 600; }
-#uvy .hint-text { flex: 1; }
-#uvy .hint-icon {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 22.5%;
-  background-image: url("../assets/sprite.webp");
-  background-repeat: no-repeat;
-}
-
-#uvy button {
-  display: block;
-  width: 100%;
-  padding: 13px;
-  border: 0;
-  border-radius: 15px;
-  background: #FFD91C;
-  color: #16161a;
-  font: 700 16px/1 -apple-system, system-ui, sans-serif;
-  cursor: pointer;
+#install .point-down svg { width: 100%; height: 100%; display: block; }
+@keyframes point {
+  0%, 100% { transform: translateY(0);   opacity: .55; }
+  50%      { transform: translateY(10px); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #uvy .card, #uvy .uvy-icon { animation: none; }
+  #install, #install .card, #install .point-down { animation: none; }
 }
 
 /* ── toast ────────────────────────────────────────────────────── */
