@@ -36,7 +36,7 @@ img { -webkit-user-drag: none; user-drag: none; }
 #wallpaper {
   position: fixed;
   inset: 0;
-  background: #0b3f6b url("../assets/wallpaper.jpg") center / cover no-repeat;
+  background: #0b3f6b url("../assets/wallpaper.webp") center / cover no-repeat;
   transition: filter .5s ease, transform .5s ease;
 }
 body.playing #wallpaper { filter: brightness(.42) saturate(.7); transform: scale(1.06); }
@@ -113,15 +113,14 @@ body.playing #dock { opacity: 0; }
   border-radius: 22.5%;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  /* every icon is one cell of a single sprite sheet — 1 request, not 40.
+     background-position is set per icon, the grid size once on :root */
+  background-image: url("../assets/sprite.webp");
+  background-size: var(--sprite-size, 800% 500%);
+  background-repeat: no-repeat;
   /* morph to a ball is a transition on these two */
   transition: border-radius .45s cubic-bezier(.5,0,.2,1),
               box-shadow .45s ease;
-}
-.app .art img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
 }
 
 .app .seams {

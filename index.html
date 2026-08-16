@@ -8,6 +8,28 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <title>Home</title>
+<!-- Both images are referenced from CSS/JS, so without these they'd wait for the
+     stylesheet and the module graph to resolve first. Preloading starts them at
+     the same instant as the HTML. -->
+<link rel="preload" as="image" href="assets/sprite.webp">
+<link rel="preload" as="image" href="assets/wallpaper.webp">
+
+<!-- ES modules load in waves: main.js can't request what it imports until it has
+     been fetched and parsed, and so on down the graph. That was three round
+     trips before a single icon appeared. modulepreload fetches the whole graph
+     in parallel, immediately. -->
+<link rel="modulepreload" href="js/main.js">
+<link rel="modulepreload" href="js/homescreen.js">
+<link rel="modulepreload" href="js/longpress.js">
+<link rel="modulepreload" href="js/game.js">
+<link rel="modulepreload" href="js/apps.js">
+<link rel="modulepreload" href="js/sprite.js">
+<link rel="modulepreload" href="js/config.js">
+<link rel="modulepreload" href="js/physics.js">
+<link rel="modulepreload" href="js/hoop.js">
+<link rel="modulepreload" href="js/transform.js">
+<link rel="modulepreload" href="js/tilt.js">
+
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="assets/icons/safari.png">
 <link rel="stylesheet" href="css/styles.css">

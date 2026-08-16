@@ -1,4 +1,5 @@
 import { PAGES, DOCK } from './apps.js';
+import { COLS, ROWS, INDEX } from './sprite.js';
 
 // Basketball seams, drawn over the icon once it goes round.
 // viewBox is 0-100 so it scales to whatever the icon size is.
@@ -16,14 +17,25 @@ const SWIPE = 45;   // px of horizontal drag before the page flips
 let page = 0;
 let track;
 
+/** Which cell of assets/sprite.webp holds this icon, as a background-position. */
+function spritePos(id) {
+  const n = INDEX[id];
+  if (n === undefined) return '0% 0%';
+  const col = n % COLS;
+  const row = Math.floor(n / COLS);
+  // with background-size set to COLS x ROWS, 100% means "last cell"
+  const x = COLS > 1 ? (col / (COLS - 1)) * 100 : 0;
+  const y = ROWS > 1 ? (row / (ROWS - 1)) * 100 : 0;
+  return `${x.toFixed(3)}% ${y.toFixed(3)}%`;
+}
+
 function makeIcon(app) {
   const el = document.createElement('button');
   el.type = 'button';
   el.className = 'app';
   el.dataset.id = app.id;
   el.innerHTML =
-    `<span class="art">` +
-      `<img src="assets/icons/${app.id}.png" alt="" draggable="false">` +
+    `<span class="art" style="background-position:${spritePos(app.id)}">` +
       `<span class="seams">${SEAMS}</span>` +
     `</span>` +
     `<span class="name">${app.name}</span>`;
@@ -39,6 +51,9 @@ function makeIcon(app) {
 }
 
 export function buildHomeScreen() {
+  // one place to keep the sprite grid in sync with the generated index
+  document.documentElement.style.setProperty('--sprite-size', `${COLS * 100}% ${ROWS * 100}%`);
+
   track = document.getElementById('track');
   const dots = document.getElementById('dots');
   const dock = document.getElementById('dock-icons');

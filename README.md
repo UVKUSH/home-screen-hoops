@@ -70,6 +70,41 @@ on — it removes the hard part of physics (two dozen balls resting on each othe
 without jittering or sinking) and reduces the engine to about a hundred lines.
 The resting pile is only simulated when tilt is switched on.
 
+## Changing the icons
+
+Drop a PNG into `assets/icons/`, add it to [`js/apps.js`](js/apps.js), then
+repack the sprite:
+
+```bash
+npm run build
+```
+
+That regenerates `assets/sprite.webp` and `js/sprite.js`. Nothing else is built —
+the page runs straight from source.
+
+## Why it loads fast
+
+It's ~130 KB over 15 requests, and everything starts downloading at once.
+
+| | before | after |
+| --- | --- | --- |
+| requests | 54 | 15 |
+| icons | 40 PNGs, 432 KB | 1 sprite, 96 KB |
+| wallpaper | 160 KB JPEG | 30 KB WebP |
+
+Three things did it:
+
+- **One sprite instead of 40 icons.** Each icon is a cell of a single WebP, so
+  it's one request rather than forty.
+- **`modulepreload` on the whole module graph.** ES modules load in waves —
+  `main.js` can't request what it imports until it has been fetched and parsed.
+  That was three round trips before anything appeared; now the whole graph is
+  fetched in parallel.
+- **Preloading the images.** Both are referenced from CSS and JS, so they used to
+  queue behind the stylesheet and the module graph. Now they start with the HTML.
+
+WebP needs iOS 14+ (2020). Older phones would show a blank grid.
+
 ## Tests
 
 ```bash
