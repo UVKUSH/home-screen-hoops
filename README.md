@@ -9,12 +9,16 @@ the grid, like nothing happened.
 
 ## Try it
 
+**→ [uvkush.github.io/home-screen-hoops](https://uvkush.github.io/home-screen-hoops/)**
+
+Open it on a phone, then **Share → Add to Home Screen**. It launches with no
+browser bars at all, which is most of the joke.
+
+To run it locally:
+
 ```bash
 python3 -m http.server 8765
 ```
-
-Then open `http://localhost:8765`. On a phone, use **Share → Add to Home Screen**
-— it launches with no browser bars at all, which is most of the joke.
 
 ## How to play
 
