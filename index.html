@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#021733">
 <title>Home</title>
 <!-- Both images are referenced from CSS/JS, so without these they'd wait for the
      stylesheet and the module graph to resolve first. Preloading starts them at
@@ -20,6 +20,7 @@
      in parallel, immediately. -->
 <link rel="modulepreload" href="js/main.js">
 <link rel="modulepreload" href="js/homescreen.js">
+<link rel="modulepreload" href="js/splash.js">
 <link rel="modulepreload" href="js/longpress.js">
 <link rel="modulepreload" href="js/game.js">
 <link rel="modulepreload" href="js/apps.js">
@@ -31,10 +32,101 @@
 <link rel="modulepreload" href="js/tilt.js">
 
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="assets/icons/safari.png">
+<link rel="apple-touch-icon" href="assets/touch-icon.png">
 <link rel="stylesheet" href="css/styles.css">
+
+<!-- The splash is inline — markup, styles and logo all in this file — so it
+     paints on the very first frame. Pulling any of it from another file would
+     mean a round trip before the loading screen itself could show up. -->
+<style>
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+    transition: opacity .45s ease;
+    /* failsafe: if the scripts never run, don't trap anyone on a blank screen */
+    animation: splash-bail 1ms linear 6s forwards;
+  }
+  #splash.done { opacity: 0; pointer-events: none; }
+  @keyframes splash-bail { to { opacity: 0; visibility: hidden; } }
+
+  #splash .mark {
+    width: 134px;
+    height: 134px;
+    animation: dribble 1.05s infinite;
+  }
+  #splash .mark svg { width: 100%; height: 100%; display: block; }
+
+  #splash .shadow {
+    width: 74px;
+    height: 9px;
+    margin-top: 10px;
+    border-radius: 50%;
+    background: #16161a;
+    animation: squash 1.05s infinite;
+  }
+
+  #splash .by {
+    margin-top: 30px;
+    font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: #16161a;
+    opacity: .5;
+  }
+
+  /* a dribble: falls fast, squashes on contact, springs back up */
+  @keyframes dribble {
+    0%   { transform: translateY(-34px) scale(1, 1);
+           animation-timing-function: cubic-bezier(.45,0,.9,.45); }
+    44%  { transform: translateY(0) scale(1.09, .9);
+           animation-timing-function: cubic-bezier(.1,.7,.3,1); }
+    54%  { transform: translateY(-6px) scale(.97, 1.03); }
+    100% { transform: translateY(-34px) scale(1, 1); }
+  }
+  @keyframes squash {
+    0%, 100% { transform: scaleX(.55); opacity: .12; }
+    46%      { transform: scaleX(1);   opacity: .3; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #splash .mark, #splash .shadow { animation: none; }
+  }
+</style>
 </head>
 <body>
+
+<div id="splash">
+  <div class="mark">
+    <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UVY">
+      <!-- headphone cups, behind the head -->
+      <ellipse cx="252" cy="500" rx="66" ry="108" fill="#16161a"/>
+      <ellipse cx="772" cy="500" rx="66" ry="108" fill="#16161a"/>
+      <!-- dark disc that shows as the rim around the face -->
+      <circle cx="512" cy="514" r="248" fill="#16161a"/>
+      <!-- the eared face -->
+      <path d="M272 226 L380 334 C425 288 465 270 512 270 C559 270 599 288 644 334
+               L752 226 L748 506 C748 642 641 730 512 730 C383 730 276 642 276 506 Z"
+            fill="#FFD91C" stroke="#16161a" stroke-width="26" stroke-linejoin="round"/>
+      <!-- U and V for eyes -->
+      <path d="M366 406 L366 462 C366 518 460 518 460 462 L460 406"
+            fill="none" stroke="#16161a" stroke-width="21" stroke-linecap="round"/>
+      <path d="M566 406 L614 514 L662 406"
+            fill="none" stroke="#16161a" stroke-width="21"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- smile -->
+      <path d="M400 590 C438 666 586 666 624 590"
+            fill="none" stroke="#16161a" stroke-width="22" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="shadow"></div>
+  <p class="by">made by uv kush</p>
+</div>
 
 <div id="wallpaper"></div>
 

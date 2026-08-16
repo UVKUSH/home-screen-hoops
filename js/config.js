@@ -25,6 +25,11 @@ export const TUNE = {
   tiltStrength: 0.55, // how hard leaning the phone drags the balls sideways.
                       // 0 turns tilt off completely, 1 is comically slidey.
 
+  // -- loading screen --------------------------------------------
+  splashMs:    1100, // shortest time the logo stays up. The page loads in a few
+                     // hundred ms, so without this the splash just flashes by
+  splashMaxMs: 4000, // give up waiting for artwork after this and show the phone
+
   // -- the gag ---------------------------------------------------
   holdMs:     550,   // how long you hold Spotlight before it breaks
   dropMs:     1900,  // how long the icons tumble before the pile freezes

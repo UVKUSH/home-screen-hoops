@@ -10,11 +10,20 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  /* Added to the home screen, iOS doesn't always let the page paint into the
+     safe areas — it fills them with the root background instead, which as
+     plain black showed up as a hard bar under the dock. These two colours are
+     sampled from the top and bottom edges of the wallpaper, so whatever strip
+     iOS leaves over now blends into the picture. */
+  background: linear-gradient(#0076c5 0%, #021733 100%);
+}
+
 html, body {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
-  background: #000;
+  background-color: transparent;
   font: 400 16px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
   color: #fff;
   -webkit-font-smoothing: antialiased;
@@ -35,7 +44,12 @@ img { -webkit-user-drag: none; user-drag: none; }
 /* ── wallpaper ────────────────────────────────────────────── */
 #wallpaper {
   position: fixed;
-  inset: 0;
+  /* bleed past the safe areas so the picture itself fills them wherever iOS
+     does let us paint there */
+  top: calc(-1 * var(--safe-t));
+  bottom: calc(-1 * var(--safe-b));
+  left: 0;
+  right: 0;
   background: #0b3f6b url("../assets/wallpaper.webp") center / cover no-repeat;
   transition: filter .5s ease, transform .5s ease;
 }
@@ -69,6 +83,14 @@ body.playing #dock { opacity: 0; }
 }
 .status-right { display: flex; align-items: center; gap: 5px; }
 .status-right svg { display: block; }
+
+/* Added to the home screen, iOS draws its OWN status bar over the page — so
+   ours would sit right underneath it as an obvious duplicate. Hide ours and
+   let the real clock and battery do the work; they're more convincing anyway. */
+body.standalone #statusbar { display: none; }
+body.standalone #home { padding-top: calc(var(--safe-t) + 4px); }
+/* iOS draws the real home indicator too, so ours would be a second pill */
+body.standalone #homebar { display: none; }
 
 /* ── icon grid ────────────────────────────────────────────── */
 #pages {

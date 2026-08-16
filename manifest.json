@@ -4,9 +4,9 @@
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#fafafa",
+  "theme_color": "#021733",
   "icons": [
-    { "src": "assets/icons/safari.png", "sizes": "120x120", "type": "image/png" }
+    { "src": "assets/touch-icon.png", "sizes": "180x180", "type": "image/png" }
   ]
 }

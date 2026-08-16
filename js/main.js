@@ -1,11 +1,13 @@
 import { buildHomeScreen } from './homescreen.js';
 import { watchSpotlight } from './longpress.js';
 import { createGame } from './game.js';
+import { runSplash } from './splash.js';
 
 const EXIT_STRIP = 26; // bottom edge zone reserved for the iOS-style home swipe
 const EXIT_PULL  = 55; // how far up you drag it to bail out
 
 buildHomeScreen();
+runSplash();
 const game = createGame();
 watchSpotlight((origin) => game.breakPhone(origin));
 

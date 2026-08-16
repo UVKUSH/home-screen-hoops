@@ -54,6 +54,13 @@ export function buildHomeScreen() {
   // one place to keep the sprite grid in sync with the generated index
   document.documentElement.style.setProperty('--sprite-size', `${COLS * 100}% ${ROWS * 100}%`);
 
+  // Launched from the home screen rather than in a browser tab? iOS reports it
+  // via navigator.standalone; everything else uses the display-mode query.
+  const standalone = navigator.standalone === true
+    || matchMedia('(display-mode: standalone)').matches
+    || matchMedia('(display-mode: fullscreen)').matches;
+  if (standalone) document.body.classList.add('standalone');
+
   track = document.getElementById('track');
   const dots = document.getElementById('dots');
   const dock = document.getElementById('dock-icons');
