@@ -42,8 +42,8 @@ export function createGame() {
   let shots = 0;
   let loaded = null;       // the ball parked at the launch corner, ready to go
   let held = null;         // the ball actually under the finger — any ball you grab
-  let active = null;       // the ball in the air
-  let shotT = 0;
+  let flying = [];         // every ball currently in the air — you can shoot
+                           // again without waiting for the last one to land
   let drag = null;
   let tookAShot = false;   // the "flick up" nudge only shows until the first shot
   let total = 0;           // one shot per icon on the page you broke
@@ -107,6 +107,23 @@ export function createGame() {
     }
   }
 
+  /**
+   * Bring the next ball to the corner while the current shot is still in the
+   * air, so it's waiting the instant the shot resolves rather than starting to
+   * glide then. Never finishes the game — that's endShot's job, or the
+   * scorecard would appear mid-flight on the last shot.
+   */
+  function preload() {
+    if (loaded || shots >= total) return;
+    const pool = balls.filter((b) => !b.shot && !b.gone);
+    if (!pool.length) return;
+
+    loaded = pool.reduce((a, b) => (b.y > a.y ? b : a));
+    loaded.asleep = false;
+    loaded.settling = true;
+    refreshRings();
+  }
+
   function launchPoint() {
     return { x: world.w * LAUNCH_X, y: world.h * LAUNCH_Y };
   }
@@ -126,7 +143,7 @@ export function createGame() {
   }
 
   function grab(e) {
-    if (state !== 'play' || active) return;
+    if (state !== 'play') return;
 
     // grab what you touched; touching nothing falls back to the parked ball so
     // a lazy flick from anywhere still works
@@ -215,14 +232,15 @@ export function createGame() {
 
     sound.whoosh(speed / (world.h * LOUDEST));
 
-    active = ball;
+    ball.flightT = 0;
+    flying.push(ball);
     if (ball === loaded) loaded = null;     // the corner is free again
     refreshRings();
-    shotT = 0;
     shots++;
     tookAShot = true;
     hint.classList.remove('show');
     updateHud();
+    preload();          // the next ball moves up while this one is still flying
   }
 
   /**
@@ -267,7 +285,9 @@ export function createGame() {
       // let its velocity run away to hundreds of px/s while it looked calm, and
       // it battered the pile every frame.
       const gliding = loaded && loaded !== held && loaded.settling;
-      const loose = balls.filter((b) => !b.gone && b !== active && b !== held && b !== (gliding ? loaded : null));
+      const loose = balls.filter((b) => (
+        !b.gone && b !== held && !flying.includes(b) && b !== (gliding ? loaded : null)
+      ));
       for (const b of loose) {
         if (tilt.live) b.asleep = false;
         stepBall(b, world, null, dt);
@@ -280,7 +300,7 @@ export function createGame() {
       const bodies = [...loose];
       if (held) bodies.unshift(held);
       if (gliding) bodies.unshift(loaded);
-      if (active && shotT > 0.25) bodies.push(active);
+      for (const b of flying) if (b.flightT > 0.25) bodies.push(b);
       separate(bodies, 4, world);
       settle(loose, dt);      // after separate, or a resting ball never looks still
 
@@ -289,8 +309,8 @@ export function createGame() {
         loaded.vx = 0;
         loaded.vy = 0;
         const p = launchPoint();
-        loaded.x += (p.x - loaded.x) * Math.min(1, dt * 9);
-        loaded.y += (p.y - loaded.y) * Math.min(1, dt * 9);
+        loaded.x += (p.x - loaded.x) * Math.min(1, dt * 16);
+        loaded.y += (p.y - loaded.y) * Math.min(1, dt * 16);
         loaded.rot *= 0.9;
         // An eased approach never actually arrives, so it would keep nudging
         // (and re-rendering) forever. Snap and sleep once it's close enough.
@@ -308,13 +328,13 @@ export function createGame() {
         hint.style.left = `${loaded.x.toFixed(0)}px`;
       }
 
-      if (active) {
-        shotT += dt;
-        const ev = stepBall(active, world, hoop, dt);
-        playHit(active);
+      for (const b of flying) {
+        b.flightT += dt;
+        const ev = stepBall(b, world, hoop, dt);
+        playHit(b);
         if (ev === 'score') onScore();
-        if (shotOver()) endShot();
       }
+      for (const b of [...flying]) if (shotOver(b)) endShot(b);
 
       balls.forEach(render);
     }
@@ -325,12 +345,18 @@ export function createGame() {
     if (b.hit) sound.impact(b.hit.type, b.hit.speed / (world.h * LOUDEST));
   }
 
-  function shotOver() {
-    if (!active) return false;
-    if (active.y - active.r > world.h) return true;
-    if (shotT > 4.5) return true;
-    const settled = active.y + active.r >= world.floor - 2 && Math.abs(active.vy) < 30 && Math.abs(active.vx) < 40;
-    return settled && shotT > 0.6;
+  /**
+   * A shot is over when its OUTCOME is settled, not when the ball finally stops
+   * moving. Waiting for it to finish bouncing around the floor was costing five
+   * seconds between shots. The spent ball carries on rolling as scenery — it's
+   * already marked shot, so it can't be picked up again.
+   */
+  function shotOver(b) {
+    if (b.scored) return b.flightT > 0.3;              // it's in — get on with it
+    if (b.y - b.r > world.h) return true;              // off the bottom
+    // Falling and completely below the rim: it cannot go in from here.
+    if (b.vy > 0 && b.y - b.r > hoop.y + 30) return true;
+    return b.flightT > 2.5;                            // backstop
   }
 
   function onScore() {
@@ -343,16 +369,16 @@ export function createGame() {
     updateHud();
   }
 
-  function endShot() {
-    const b = active;
-    active = null;
+  function endShot(b) {
+    flying = flying.filter((x) => x !== b);
     if (b.scored) {
       b.gone = true;
       b.el.style.transition = 'opacity .3s ease';
       b.el.style.opacity = '0';
     }
-    if (shots >= total) finish();
-    else loadNext();
+    // only wrap up once every shot has actually landed
+    if (shots >= total && flying.length === 0) finish();
+    else preload();
   }
 
   function updateHud() {
@@ -363,6 +389,7 @@ export function createGame() {
 
   function finish() {
     state = 'over';
+    flying = [];
     if (held) held.pinned = false;
     held = null;
     loaded = null;
@@ -377,6 +404,7 @@ export function createGame() {
     if (held) held.pinned = false;
     held = null;
     loaded = null;
+    flying = [];
     score = 0;
     shots = 0;
     dropT = 0;
@@ -404,7 +432,7 @@ export function createGame() {
     if (state === 'home') return;
     scorecard.close();
     state = 'home';
-    active = null;
+    flying = [];
     if (held) held.pinned = false;
     held = null;
     loaded = null;
