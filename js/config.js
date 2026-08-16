@@ -18,12 +18,13 @@ export const TUNE = {
   rimBounce:  0.52,  // bounciness off the rim. 0 = dead thud, 1 = superball
   wallBounce: 0.58,  // bounciness off the left/right screen edges
   floorBounce:0.46,  // bounciness off the bottom
-  roll:       0.12,  // how quickly balls rolling on the floor slow down.
-                     // raise it and tilting stops moving them at all
+  roll:       0.08,  // how quickly balls rolling on the floor slow down. This is
+                     // also static friction: below it, a gentle lean won't budge
+                     // them at all. Raise it and tilt stops working
 
   // -- tilt ------------------------------------------------------
-  tiltStrength: 0.55, // how hard leaning the phone drags the balls sideways.
-                      // 0 turns tilt off completely, 1 is comically slidey.
+  tiltStrength: 1.0,  // 1 = real gravity, so a 30-degree lean pushes exactly as
+                      // hard as a 30-degree slope would. 0 turns tilt off
 
   // -- loading screen --------------------------------------------
   splashMs:    1100, // shortest time the logo stays up. The page loads in a few

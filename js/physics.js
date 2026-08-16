@@ -20,8 +20,10 @@ export function createWorld() {
   const h = window.innerHeight;
   return {
     w, h,
-    g: TUNE.gravity * h,       // px per second², downward
-    gx: 0,                     // sideways gravity — set by the tilt sensor
+    g: TUNE.gravity * h,       // px per second², the nominal strength
+    gx: 0,                     // sideways gravity — steered by tilt
+    gy: TUNE.gravity * h,      // vertical gravity — tilt can weaken or invert
+                               // this, while g stays put for the aim assist
     floor: h - 4,              // balls rest just off the bottom edge
     maxSpeed: TUNE.maxSpeed * h,
     minSpeed: TUNE.minSpeed * h,
@@ -57,7 +59,7 @@ export function stepBall(b, world, hoop, dt) {
   for (let i = 0; i < SUBSTEPS; i++) {
     const prevY = b.y;
 
-    b.vy += world.g * h;
+    b.vy += (world.gy ?? world.g) * h;
     b.vx += world.gx * h;
     b.vx *= damp;
     b.vy *= damp;
@@ -309,7 +311,12 @@ function solve(balls) {
  * A sleeping ball is skipped by stepBall entirely, which is what stops a
  * settled pile from creeping, spinning and clicking away to itself.
  */
-export function settle(list, dt) {
+export function settle(list, dt, suspended = false) {
+  // Sleeping zeroes velocity. While the phone is tilted that fights the lean —
+  // the ball builds a little speed each frame and has it wiped before it can
+  // travel far enough to count as moving, so gentle tilts do almost nothing.
+  if (suspended) return;
+
   for (const b of list) {
     if (b.asleep || b.pinned) continue;
 

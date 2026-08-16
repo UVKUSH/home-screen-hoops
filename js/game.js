@@ -280,8 +280,10 @@ export function createGame() {
     if (state === 'play' || state === 'over') {
       hoop.update(dt, shots, world);
 
-      // Leaning the phone drags everything sideways.
+      // Gravity follows the phone: lean to roll the pile, lay it flat and the
+      // balls go weightless, turn it over and they fall up off the top.
       world.gx = tilt.gx(world);
+      world.gy = tilt.gy(world);
 
       // The pile is simulated the whole time now, not just under tilt — a ball
       // you're dragging has to be able to barge the others out of the way.
@@ -294,7 +296,7 @@ export function createGame() {
         !b.gone && b !== held && !flying.includes(b) && b !== (gliding ? loaded : null)
       ));
       for (const b of loose) {
-        if (tilt.live) b.asleep = false;
+        if (tilt.leaning) b.asleep = false;
         stepBall(b, world, null, dt);
         playHit(b);
       }
@@ -307,7 +309,8 @@ export function createGame() {
       if (gliding) bodies.unshift(loaded);
       for (const b of flying) if (b.flightT > 0.25) bodies.push(b);
       separate(bodies, 4, world);
-      settle(loose, dt);      // after separate, or a resting ball never looks still
+      // never settle mid-lean, or sleeping wipes the speed the tilt is building
+      settle(loose, dt, tilt.leaning);
 
       if (gliding) {
         loaded.pinned = true;      // it shoves the pile aside, nothing shoves it

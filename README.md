@@ -28,9 +28,14 @@ python3 -m http.server 8765
 - The hoop parks in the left corner for the first two shots, then sweeps corner
   to corner, getting faster as you go
 - One shot per app icon on the page you broke (24 on page one, 20 on page two)
-- **Tilt** the phone to roll the loose balls around. On iOS you have to tap the
-  Tilt chip first — Apple requires a permission prompt before a web page can read
-  motion, and firing that prompt on load would give the gag away
+- **Tilt** the phone — gravity genuinely follows it. On iOS tap the pulsing
+  **Enable tilt** chip first; Apple requires a permission prompt before a page
+  can read motion, and firing that on load would give the gag away. Lean to
+  curve a shot in the air (20 degrees moves it about 170px), lay the phone flat
+  and the balls go nearly weightless, **turn it over and they fall up off the
+  top of the screen**.
+  Note the resting pile barely shifts: 24 balls at 62px is 6 across a 375px
+  screen, so it's wall-to-wall with nowhere to go. It loosens as you use balls up
 
 ## Tuning it
 
