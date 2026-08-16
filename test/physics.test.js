@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { makeBall, stepBall, separate, timeToRim } from '../js/physics.js';
+import { makeBall, stepBall, separate, settle, timeToRim } from '../js/physics.js';
 
 // A stand-in for a 375x812 phone. createWorld() needs a browser, stepBall doesn't.
 const world = () => ({ w: 375, h: 812, g: 3.1 * 812, gx: 0, floor: 808 });
@@ -192,4 +192,67 @@ test('overlapping balls get pushed apart', () => {
 
   separate([a, b]);
   assert.ok(Math.hypot(b.x - a.x, b.y - a.y) > 10, 'balls should have separated');
+});
+
+test('a pinned ball does the shoving and is never shoved', () => {
+  const finger = makeBall(null, 100, 100, 31);
+  const loose  = makeBall(null, 110, 100, 31);
+  finger.pinned = true;
+
+  // separation eases out over frames rather than snapping, so run it the way
+  // the game does
+  for (let i = 0; i < 30; i++) separate([finger, loose]);
+
+  assert.equal(finger.x, 100, 'the ball under the finger must not move');
+  assert.equal(finger.y, 100);
+  assert.ok(loose.x > 110, 'the loose ball takes the whole displacement');
+  assert.ok(
+    Math.hypot(loose.x - finger.x, loose.y - finger.y) >= 61,
+    'and ends up all but clear — a little overlap is tolerated on purpose',
+  );
+});
+
+// A settled pile that never sleeps jitters, spins and clicks forever — this is
+// the bug that showed up the moment the whole pile became live.
+test('a pile that has come to rest falls asleep and stops making noise', () => {
+  const w = world();
+  const pile = [0, 1, 2].map((i) => makeBall(null, 150 + i * 62, w.floor - 31, 31));
+
+  for (let i = 0; i < 240; i++) {          // four seconds
+    for (const b of pile) stepBall(b, w, null, DT);
+    separate(pile);
+    settle(pile, DT);
+  }
+
+  assert.ok(pile.every((b) => b.asleep), 'every resting ball should be asleep');
+  assert.ok(pile.every((b) => b.vrot === 0), 'and none of them still spinning');
+
+  // asleep means stepBall skips them, so no further impacts are reported
+  for (const b of pile) stepBall(b, w, null, DT);
+  assert.ok(pile.every((b) => !b.hit), 'a sleeping pile reports no impacts');
+});
+
+test('a sleeping ball wakes when something barges into it', () => {
+  const w = world();
+  const asleep = makeBall(null, 200, w.floor - 31, 31);
+  asleep.asleep = true;
+
+  const finger = makeBall(null, 200 - 40, w.floor - 31, 31);
+  finger.pinned = true;
+  finger.vx = 700;
+
+  separate([finger, asleep]);
+  assert.equal(asleep.asleep, false, 'a shove has to wake it');
+});
+
+test('a pinned ball moving into the pile passes on its speed', () => {
+  const finger = makeBall(null, 100, 100, 31);
+  const loose  = makeBall(null, 130, 100, 31);
+  finger.pinned = true;
+  finger.vx = 900;          // finger sweeping right through the pile
+
+  separate([finger, loose]);
+
+  assert.ok(loose.vx > 500, `expected a real shove, got vx=${loose.vx.toFixed(0)}`);
+  assert.equal(finger.vx, 900, 'the held ball keeps following the finger');
 });
