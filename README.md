@@ -53,22 +53,35 @@ doesn't get replaced — it just stops being a grid item and starts being a phys
 body. That's what makes it read as "my phone broke" rather than "a game loaded".
 
 ```
-index.html          the fake home screen
+index.html          the fake home screen, and the splash
 js/config.js        all the tuning dials
 js/apps.js          which apps are on which page
-js/homescreen.js    builds the pages, dock, clock, page swiping
+js/homescreen.js    builds the pages, dock, status bar, page swiping
+js/liveicons.js     the ticking Clock and the real-date Calendar
 js/longpress.js     the hold-to-break trigger
 js/transform.js     icons -> balls and back again
-js/physics.js       gravity, rim, walls, scoring   (unit tested)
+js/physics.js       gravity, contacts, rim, scoring   (unit tested)
 js/hoop.js          the hoop, and how it sweeps
-js/game.js          shots, score, scorecard
+js/game.js          shots, score, streaks, scorecard
+js/sound.js         every noise, synthesised
+js/fire.js          the ember trail
+js/dials.js         the hidden tuning panel
+js/uvy.js           the star card
+js/leaderboard.js   the end screens, sharing, install help
 js/main.js          input and the animation loop
+worker/             the leaderboard API (Cloudflare + D1)
 ```
 
-Only **one ball is ever in flight**, which is the decision the whole thing rests
-on — it removes the hard part of physics (two dozen balls resting on each other
-without jittering or sinking) and reduces the engine to about a hundred lines.
-The resting pile is only simulated when tilt is switched on.
+The whole pile is simulated the whole time, which is what lets you pick up any
+ball and barge the others out of the way — and any number of shots can be in the
+air at once, so you never wait for one to land before taking the next.
+
+Making the pile live is harder than it sounds. A heap of near-frictionless
+spheres creeps down its own slope forever, one separation pass can't resolve a
+stack, and a ball resting on one that's anchored to the floor keeps a phantom
+velocity that makes it look busy while sitting perfectly still. Hence the contact
+friction, the solver iterations, and sleeping balls being judged on distance
+actually moved rather than on what their velocity claims.
 
 ## Hidden bits
 
