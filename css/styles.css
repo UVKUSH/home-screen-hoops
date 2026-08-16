@@ -11,12 +11,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html {
-  /* Added to the home screen, iOS doesn't always let the page paint into the
-     safe areas — it fills them with the root background instead, which as
-     plain black showed up as a hard bar under the dock. These two colours are
-     sampled from the top and bottom edges of the wallpaper, so whatever strip
-     iOS leaves over now blends into the picture. */
-  background: linear-gradient(#0076c5 0%, #021733 100%);
+  /* The wallpaper goes on the ROOT element, not just on #wallpaper. A root
+     background propagates to the page canvas, which is painted across the
+     whole screen rather than only the layout box — so the picture itself
+     reaches into the safe areas under the status bar and home indicator
+     instead of a flat colour standing in for it.
+     #021733 is sampled from the bottom edge of the image, so on anything that
+     still won't let us paint there the join is invisible anyway. */
+  background: #021733 url("../assets/wallpaper.webp") center / cover no-repeat;
 }
 
 html, body {
@@ -24,7 +26,6 @@ html, body {
   height: 100dvh;      /* tracks the viewport as iOS shows/hides its own chrome */
   overflow: hidden;
   overscroll-behavior: none;
-  background-color: transparent;
   font: 400 16px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
   color: #fff;
   -webkit-font-smoothing: antialiased;
@@ -33,6 +34,9 @@ html, body {
 body {
   position: fixed;
   inset: 0;
+  /* transparent so the root's wallpaper is what reaches the canvas — if body
+     had its own background it would be the one that propagates instead */
+  background: transparent;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
@@ -44,17 +48,33 @@ img { -webkit-user-drag: none; user-drag: none; }
 
 /* ── wallpaper ────────────────────────────────────────────── */
 #wallpaper {
+  /* Exactly the root's box, so this copy and the canvas copy crop the image
+     identically and there is no seam where one meets the other. This layer
+     exists only so the wallpaper can dim and drift when the game starts —
+     the canvas underneath can't be filtered or transformed. */
   position: fixed;
-  /* bleed past the safe areas so the picture itself fills them wherever iOS
-     does let us paint there */
-  top: calc(-1 * var(--safe-t));
-  bottom: calc(-1 * var(--safe-b));
-  left: 0;
-  right: 0;
-  background: #0b3f6b url("../assets/wallpaper.webp") center / cover no-repeat;
-  transition: filter .5s ease, transform .5s ease;
+  inset: 0;
+  background: #021733 url("../assets/wallpaper.webp") center / cover no-repeat;
+  transition: transform .5s ease;
 }
-body.playing #wallpaper { filter: brightness(.42) saturate(.7); transform: scale(1.06); }
+body.playing #wallpaper { transform: scale(1.06); }
+
+/* Darkening the wallpaper for the game has to happen on a layer of its own:
+   the canvas copy filling the safe areas can't be filtered, so a brightness()
+   on #wallpaper alone would leave a bright strip under the home indicator.
+   This bleeds well past every edge instead. */
+#dim {
+  position: fixed;
+  top: calc(-1 * var(--safe-t) - 24px);
+  bottom: calc(-1 * var(--safe-b) - 24px);
+  left: -24px;
+  right: -24px;
+  background: #021733;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s ease;
+}
+body.playing #dim { opacity: .62; }
 
 /* ── home screen shell ────────────────────────────────────── */
 #home {
