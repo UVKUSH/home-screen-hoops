@@ -96,8 +96,9 @@ glows and the net warms up. Once you're lit you stay lit; it takes **three
 misses in a row** to put it out, so one unlucky rim-out doesn't end a hot streak.
 Both numbers are `fireAt` and `coolAfter` in [`config.js`](js/config.js).
 
-**Tap the UVY icon** (it's on both pages) for the star card — logo, a little
-rising chime, and *UVY · United Voice of Youth*.
+**Tap the UVY icon** (it's on both pages): *"You finally became a star on UVY"*,
+with the real app icon and a short rising chime. The icon is pulled from the same
+sprite cell the home screen uses, so it can't drift out of step with it.
 
 **The Clock and the Calendar tell the truth.** Real ticking hands, today's real
 date — exactly like iOS. They're drawn as live SVG rather than taken from the
