@@ -21,6 +21,7 @@ html {
 
 html, body {
   height: 100%;
+  height: 100dvh;      /* tracks the viewport as iOS shows/hides its own chrome */
   overflow: hidden;
   overscroll-behavior: none;
   background-color: transparent;
