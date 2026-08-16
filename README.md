@@ -32,8 +32,9 @@ python3 -m http.server 8765
   **Enable tilt** chip first; Apple requires a permission prompt before a page
   can read motion, and firing that on load would give the gag away. Lean to
   curve a shot in the air (20 degrees moves it about 170px), lay the phone flat
-  and the balls go nearly weightless, **turn it over and they fall up off the
-  top of the screen**.
+  and the balls go nearly weightless, **turn it over and the whole pile pours to the
+  top** — which, holding an upside-down phone, reads as it pouring to the
+  bottom. Turn it back and everything returns; no balls are lost
   Note the resting pile barely shifts: 24 balls at 62px is 6 across a 375px
   screen, so it's wall-to-wall with nowhere to go. It loosens as you use balls up
 

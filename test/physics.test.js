@@ -186,6 +186,32 @@ test('a ball floating in mid-air reports no impact', () => {
   assert.equal(b.hit, null);
 });
 
+// Turning the phone over inverts gravity. Without a ceiling that fires every
+// ball off the top of the screen, never to return.
+test('with gravity inverted, balls settle against the top instead of escaping', () => {
+  const w = world();
+  w.gy = -w.g;                       // phone turned over
+  const b = makeBall(null, 180, 600, 31);
+
+  simulate(b, w, null, () => false, 4);
+
+  assert.ok(b.y - b.r >= -1, `ball escaped through the top, y=${b.y.toFixed(0)}`);
+  assert.ok(Math.abs(b.vy) < 60, 'and it should have come to rest there');
+});
+
+test('a normal shot can still arc above the screen', () => {
+  const w = world();                 // gy defaults to normal gravity
+  const b = makeBall(null, 180, 500, 31);
+  b.vy = -1900;                      // a big shot
+
+  let highest = b.y;
+  for (let i = 0; i < 120; i++) {
+    stepBall(b, w, null, DT);
+    highest = Math.min(highest, b.y);
+  }
+  assert.ok(highest < 0, 'the ceiling must not exist during normal play');
+});
+
 test('overlapping balls get pushed apart', () => {
   const a = makeBall(null, 100, 100, 31);
   const b = makeBall(null, 110, 100, 31);   // badly overlapping

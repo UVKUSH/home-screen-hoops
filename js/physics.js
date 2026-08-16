@@ -55,11 +55,12 @@ export function stepBall(b, world, hoop, dt) {
   // play differently on a 120Hz phone than a 60Hz one — and the drag would be
   // heavy enough to throw off the aim assist's trajectory maths.
   const damp = Math.pow(TUNE.air, h);
+  const gy = world.gy ?? world.g;
 
   for (let i = 0; i < SUBSTEPS; i++) {
     const prevY = b.y;
 
-    b.vy += (world.gy ?? world.g) * h;
+    b.vy += gy * h;
     b.vx += world.gx * h;
     b.vx *= damp;
     b.vy *= damp;
@@ -96,6 +97,29 @@ export function stepBall(b, world, hoop, dt) {
         b.scored = true;
         event = 'score';
       }
+    }
+
+    // Ceiling — but only while gravity is pointing up, i.e. the phone has been
+    // turned over. The rest of the time shots need to be free to arc above the
+    // screen and come back. Without this, flipping the phone fires every ball
+    // off the top and they never return.
+    if (gy < 0 && b.y - b.r < 0) {
+      b.y = b.r;
+
+      if (b.vy < -REST_SPEED) {
+        noteHit(b, 'floor', -b.vy);
+        b.vy = -b.vy * TUNE.floorBounce;
+        b.vx *= 0.9;
+      } else {
+        b.vy = 0;
+      }
+
+      const fr = TUNE.roll * world.g * h;
+      if (b.vx > fr) b.vx -= fr;
+      else if (b.vx < -fr) b.vx += fr;
+      else b.vx = 0;
+
+      b.vrot = b.vx * 0.06;
     }
 
     // floor
@@ -211,6 +235,9 @@ function confine(b, bounds) {
   if (b.y > bounds.floor - b.r) {
     b.y = bounds.floor - b.r;
     if (b.vy > 0) b.vy = 0;
+  } else if ((bounds.gy ?? bounds.g) < 0 && b.y < b.r) {
+    b.y = b.r;                       // the top is the floor when turned over
+    if (b.vy < 0) b.vy = 0;
   }
 }
 
