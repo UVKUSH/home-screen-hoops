@@ -873,11 +873,34 @@ body.playing #hud { opacity: 1; }
   color: #FFD91C;
 }
 #uvy .uvy-sub {
-  margin-bottom: 26px;
+  margin-bottom: 20px;
   font: 500 13px/1.4 -apple-system, system-ui, sans-serif;
   letter-spacing: .7px;
   color: rgba(255,255,255,.6);
 }
+/* one secret pointing at the next */
+#uvy .uvy-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  font: 500 13px/1.35 -apple-system, system-ui, sans-serif;
+  color: rgba(255,255,255,.55);
+  text-align: left;
+}
+#uvy .uvy-hint b { color: rgba(255,255,255,.9); font-weight: 600; }
+#uvy .hint-text { flex: 1; }
+#uvy .hint-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 22.5%;
+  background-image: url("../assets/sprite.webp");
+  background-repeat: no-repeat;
+}
+
 #uvy button {
   display: block;
   width: 100%;
