@@ -6,6 +6,7 @@ import { resetSpotlight } from './longpress.js';
 import { createTilt } from './tilt.js';
 import { createScorecard } from './leaderboard.js';
 import * as sound from './sound.js';
+import { ember, clearEmbers } from './fire.js';
 
 // Where the loaded ball waits. Kept above the pile so the ball you're about to
 // shoot is never buried in it, and pushed to the RIGHT so there's real diagonal
@@ -47,6 +48,9 @@ export function createGame() {
   let drag = null;
   let tookAShot = false;   // the "flick up" nudge only shows until the first shot
   let total = 0;           // one shot per icon on the page you broke
+  let streak = 0;          // buckets in a row — hit enough and the ball lights up
+  let misses = 0;          // misses in a row; only a run of them puts the fire out
+  let lit = false;         // currently on fire
 
   // ── the gag fires ───────────────────────────────────────────
   function breakPhone(origin) {
@@ -231,6 +235,7 @@ export function createGame() {
     ball.shot = true;
 
     sound.whoosh(speed / (world.h * LOUDEST));
+    if (lit) ball.el.classList.add('fire');
 
     ball.flightT = 0;
     flying.push(ball);
@@ -332,6 +337,7 @@ export function createGame() {
         b.flightT += dt;
         const ev = stepBall(b, world, hoop, dt);
         playHit(b);
+        if (b.el.classList.contains('fire')) ember(b.x, b.y, b.r);
         if (ev === 'score') onScore();
       }
       for (const b of [...flying]) if (shotOver(b)) endShot(b);
@@ -341,6 +347,29 @@ export function createGame() {
   }
 
   /** Turn whatever the ball just hit into a noise. */
+  /** Full reset, for leaving or restarting a game. */
+  function coolDown() {
+    putOut();
+    clearEmbers();
+  }
+
+  function putOut() {
+    lit = false;
+    streak = 0;
+    misses = 0;
+    document.body.classList.remove('on-fire');
+    for (const b of balls) b.el.classList.remove('fire');
+  }
+
+  function catchFire() {
+    lit = true;
+    misses = 0;
+    document.body.classList.add('on-fire');
+    sound.ignite();
+    navigator.vibrate?.([14, 30, 14, 30, 40]);
+    for (const b of flying) b.el.classList.add('fire');
+  }
+
   function playHit(b) {
     if (b.hit) sound.impact(b.hit.type, b.hit.speed / (world.h * LOUDEST));
   }
@@ -361,6 +390,9 @@ export function createGame() {
 
   function onScore() {
     score++;
+    misses = 0;
+    streak++;
+    if (streak === TUNE.fireAt) catchFire();
     sound.swish();
     hoop.swish();
     navigator.vibrate?.(18);
@@ -371,6 +403,17 @@ export function createGame() {
 
   function endShot(b) {
     flying = flying.filter((x) => x !== b);
+    b.el.classList.remove('fire');
+    if (!b.scored) {
+      misses += 1;
+      // Once you're lit you stay lit. One rim-out shouldn't end a hot streak —
+      // it takes a proper run of misses to put it out.
+      if (lit) {
+        if (misses >= TUNE.coolAfter) putOut();
+      } else {
+        streak = 0;
+      }
+    }
     if (b.scored) {
       b.gone = true;
       b.el.style.transition = 'opacity .3s ease';
@@ -390,6 +433,7 @@ export function createGame() {
   function finish() {
     state = 'over';
     flying = [];
+    coolDown();
     if (held) held.pinned = false;
     held = null;
     loaded = null;
@@ -405,6 +449,7 @@ export function createGame() {
     held = null;
     loaded = null;
     flying = [];
+    coolDown();
     score = 0;
     shots = 0;
     dropT = 0;
@@ -433,6 +478,7 @@ export function createGame() {
     scorecard.close();
     state = 'home';
     flying = [];
+    coolDown();
     if (held) held.pinned = false;
     held = null;
     loaded = null;
@@ -449,6 +495,14 @@ export function createGame() {
     resetSpotlight();
   }
 
+  // Gravity and the speed caps are baked into the world when it's built, so a
+  // change from the dials panel has to be folded in rather than read per frame.
+  addEventListener('dials-changed', () => {
+    world.g = TUNE.gravity * world.h;
+    world.maxSpeed = TUNE.maxSpeed * world.h;
+    world.minSpeed = TUNE.minSpeed * world.h;
+  });
+
   function resize() {
     const w = createWorld();
     world = w;
@@ -462,6 +516,7 @@ export function createGame() {
     get shots() { return shots; },
     get hoop() { return hoop; },
     get balls() { return balls; },
+    get streakState() { return { streak, misses, lit }; },
     get world() { return world; },
     get audioReady() { return sound.ready(); },
     /** Jump straight to the scorecard. Only reachable via ?debug. */

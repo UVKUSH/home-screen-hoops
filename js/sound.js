@@ -165,6 +165,33 @@ export function whoosh(strength) {
   src.stop(t + 0.3);
 }
 
+// ── catching fire ─────────────────────────────────────────────
+export function ignite() {
+  if (!ctx) return;
+  const t = now();
+
+  // a rising roar: noise swept upward, with a low swell underneath
+  const src = noise();
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.Q.value = 1.1;
+  bp.frequency.setValueAtTime(320, t);
+  bp.frequency.exponentialRampToValueAtTime(2600, t + 0.42);
+  const g = envelope(0.38, 0.08, 0.4, t);
+  src.connect(bp).connect(g).connect(master);
+  src.start(t);
+  src.stop(t + 0.55);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(70, t);
+  osc.frequency.exponentialRampToValueAtTime(210, t + 0.4);
+  const lo = envelope(0.18, 0.06, 0.38, t);
+  osc.connect(lo).connect(master);
+  osc.start(t);
+  osc.stop(t + 0.5);
+}
+
 /** Routes a physics impact to the right noise. */
 export function impact(type, strength) {
   if (type === 'rim') clang(strength);

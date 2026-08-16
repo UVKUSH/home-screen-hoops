@@ -30,6 +30,11 @@ export const TUNE = {
                      // hundred ms, so without this the splash just flashes by
   splashMaxMs: 4000, // give up waiting for artwork after this and show the phone
 
+  // -- streaks ---------------------------------------------------
+  fireAt: 3,         // buckets in a row before the ball catches fire
+  coolAfter: 3,      // and it takes this many misses IN A ROW to put it out —
+                     // one unlucky rim-out shouldn't end a hot streak
+
   // -- the gag ---------------------------------------------------
   holdMs:     550,   // how long you hold Spotlight before it breaks
   dropMs:     1900,  // how long the icons tumble before the pile freezes

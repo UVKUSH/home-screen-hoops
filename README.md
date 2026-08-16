@@ -70,6 +70,24 @@ on — it removes the hard part of physics (two dozen balls resting on each othe
 without jittering or sinking) and reduces the engine to about a hundred lines.
 The resting pile is only simulated when tilt is switched on.
 
+## Hidden bits
+
+**Tap Settings seven times** (on the home screen, within a couple of seconds) and
+you get the real tuning dials — gravity, shot power, aim help, hoop speed and the
+rest, as live sliders. They write straight into `TUNE`, so the change lands
+immediately, and there's a Reset. It's the one icon where a secret settings
+panel isn't a joke at the game's expense: it *is* the Settings app.
+
+**Three baskets in a row and the ball catches fire** — it trails embers, the rim
+glows and the net warms up. Once you're lit you stay lit; it takes **three
+misses in a row** to put it out, so one unlucky rim-out doesn't end a hot streak.
+Both numbers are `fireAt` and `coolAfter` in [`config.js`](js/config.js).
+
+**The Clock and the Calendar tell the truth.** Real ticking hands, today's real
+date — exactly like iOS. They're drawn as live SVG rather than taken from the
+sprite, because hands baked into a picture can't move. It's the detail that
+makes someone look twice and wonder whether the phone is actually fake.
+
 ## Sound
 
 There are no audio files. Every sound is synthesised in

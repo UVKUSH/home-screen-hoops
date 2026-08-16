@@ -1,5 +1,7 @@
 import { PAGES, DOCK } from './apps.js';
 import { COLS, ROWS, INDEX } from './sprite.js';
+import { LIVE_ICONS, liveArt, startLiveIcons } from './liveicons.js';
+import { countSettingsTap } from './dials.js';
 
 // Basketball seams, drawn over the icon once it goes round.
 // viewBox is 0-100 so it scales to whatever the icon size is.
@@ -34,15 +36,21 @@ function makeIcon(app) {
   el.type = 'button';
   el.className = 'app';
   el.dataset.id = app.id;
-  el.innerHTML =
-    `<span class="art" style="background-position:${spritePos(app.id)}">` +
-      `<span class="seams">${SEAMS}</span>` +
-    `</span>` +
-    `<span class="name">${app.name}</span>`;
+  // Clock and Calendar are drawn live rather than lifted from the sprite —
+  // hands that are baked into a picture can't move.
+  const live = LIVE_ICONS.has(app.id);
+  const art = live
+    ? `<span class="art live">${liveArt(app.id)}<span class="seams">${SEAMS}</span></span>`
+    : `<span class="art" style="background-position:${spritePos(app.id)}">` +
+      `<span class="seams">${SEAMS}</span></span>`;
+
+  el.innerHTML = art + `<span class="name">${app.name}</span>`;
 
   // Nothing actually opens — just a little "nope" wobble so people keep poking.
   el.addEventListener('click', () => {
     if (document.body.classList.contains('playing')) return;
+    // seven taps on Settings opens the real dials
+    if (app.id === 'settings' && countSettingsTap()) return;
     el.classList.remove('nope');
     void el.offsetWidth;        // restart the animation
     el.classList.add('nope');
@@ -81,6 +89,7 @@ export function buildHomeScreen() {
 
   watchSwipe();
   startClock();
+  startLiveIcons();
 }
 
 // ── paging ────────────────────────────────────────────────────

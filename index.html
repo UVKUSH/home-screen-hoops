@@ -24,10 +24,13 @@
 <link rel="modulepreload" href="js/leaderboard.js">
 <link rel="modulepreload" href="js/api.js">
 <link rel="modulepreload" href="js/sound.js">
+<link rel="modulepreload" href="js/fire.js">
 <link rel="modulepreload" href="js/longpress.js">
 <link rel="modulepreload" href="js/game.js">
 <link rel="modulepreload" href="js/apps.js">
 <link rel="modulepreload" href="js/sprite.js">
+<link rel="modulepreload" href="js/liveicons.js">
+<link rel="modulepreload" href="js/dials.js">
 <link rel="modulepreload" href="js/config.js">
 <link rel="modulepreload" href="js/physics.js">
 <link rel="modulepreload" href="js/hoop.js">
@@ -189,12 +192,13 @@
      while the court is put away — aria-hidden alone leaves them tabbable -->
 <div id="court" inert>
   <div class="layer" id="hoop-back"></div>
+  <div class="layer" id="embers"></div>
   <div class="layer" id="balls"></div>
   <div class="layer" id="hoop-front"></div>
 
   <div id="hint"><svg width="15" height="9" viewBox="0 0 15 9" aria-hidden="true"><path d="M1.5 7.5 7.5 1.5l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Flick up</span></div>
 
-  <div id="hud"><b id="hud-score">0</b><span id="hud-shots">24 left</span></div>
+  <div id="hud"><b id="hud-score">0</b><span id="hud-shots">24 left</span><span id="streak">ON FIRE</span></div>
   <button id="tilt" type="button">Tilt</button>
   <div id="flash"></div>
 
