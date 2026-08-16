@@ -59,7 +59,7 @@ export const TUNE = {
 // simply off — the game plays exactly the same, the "Get on the leaderboard"
 // button just doesn't appear. `worker/setup.sh` fills this in after deploying.
 export const API = {
-  apiBase: '',
+  apiBase: 'https://hoops-leaderboard.uv2647.workers.dev',
 };
 
 // Ranks shown on the scorecard, checked from the top down. Kept as fractions
