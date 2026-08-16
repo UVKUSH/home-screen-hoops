@@ -21,6 +21,8 @@
 <link rel="modulepreload" href="js/main.js">
 <link rel="modulepreload" href="js/homescreen.js">
 <link rel="modulepreload" href="js/splash.js">
+<link rel="modulepreload" href="js/leaderboard.js">
+<link rel="modulepreload" href="js/api.js">
 <link rel="modulepreload" href="js/longpress.js">
 <link rel="modulepreload" href="js/game.js">
 <link rel="modulepreload" href="js/apps.js">
@@ -196,12 +198,71 @@
   <div id="flash"></div>
 
   <div id="scorecard">
-    <div class="card">
+    <!-- how it went -->
+    <div class="card" data-panel="result">
       <p class="eyebrow">Final</p>
       <p class="tally"><b id="final-score">0</b><span id="final-total">/ 24</span></p>
       <p class="rank" id="final-rank">Airball</p>
-      <button id="again" type="button">Run it back</button>
+      <button id="join" type="button" hidden>Get on the leaderboard</button>
+      <button id="again" type="button">Keep going</button>
       <button id="quit" type="button" class="ghost">Go home</button>
+      <button class="link" type="button" data-install>Add this to your home screen</button>
+    </div>
+
+    <!-- name + contact -->
+    <form class="card" data-panel="join" hidden novalidate>
+      <p class="eyebrow">Leaderboard</p>
+      <h2 class="ttl">Put your name up</h2>
+      <label class="field">
+        <span>Name</span>
+        <input id="f-name" type="text" maxlength="18" autocomplete="nickname"
+               enterkeyhint="next" placeholder="This is what everyone sees">
+      </label>
+      <label class="field">
+        <span>Email or phone</span>
+        <input id="f-contact" type="text" maxlength="120" autocomplete="email"
+               inputmode="email" enterkeyhint="go" placeholder="Kept private">
+      </label>
+      <div class="chips" id="domain-chips"></div>
+      <p class="err" id="f-err" hidden></p>
+      <button id="f-go" type="submit">Submit my score</button>
+      <button type="button" class="ghost" data-back>Back</button>
+    </form>
+
+    <!-- the board -->
+    <div class="card" data-panel="board" hidden>
+      <p class="eyebrow">Leaderboard</p>
+      <p class="you" id="you-rank"></p>
+      <ol id="board" class="board"></ol>
+      <button id="share" type="button">Try it on a friend's phone</button>
+      <button id="again2" type="button" class="ghost">Keep going</button>
+      <button id="quit2" type="button" class="ghost">Go home</button>
+      <button class="link" type="button" data-install>Add this to your home screen</button>
+    </div>
+  </div>
+
+  <!-- how to install it, shown on demand -->
+  <div id="install" hidden>
+    <div class="card">
+      <p class="eyebrow">Make it look real</p>
+      <h2 class="ttl">Add it to your home screen</h2>
+      <ol class="steps">
+        <li>
+          <span class="n">1</span>
+          <span>Tap
+            <svg class="ios-share" width="15" height="19" viewBox="0 0 15 19" aria-hidden="true">
+              <path d="M7.5 1.2v10.4M7.5 1.2 4.3 4.4M7.5 1.2l3.2 3.2" fill="none"
+                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3.4 7.6H1.8v9.6h11.4V7.6h-1.6" fill="none"
+                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <b>Share</b> at the bottom of Safari
+          </span>
+        </li>
+        <li><span class="n">2</span><span>Scroll down, tap <b>Add to Home Screen</b></span></li>
+        <li><span class="n">3</span><span>Open it from there — no address bar, and it looks like a real phone</span></li>
+      </ol>
+      <button type="button" data-close-install>Got it</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hoops-leaderboard",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-16",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 }
+  },
+
+  // Which sites may call this API. Anything not listed gets a CORS refusal.
+  "vars": {
+    "ALLOWED_ORIGINS": "https://uvkush.github.io,http://localhost:8765"
+  },
+
+  // database_id is filled in by ./setup.sh (or `npx wrangler d1 create hoops`)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hoops",
+      "database_id": "PASTE_DATABASE_ID_HERE"
+    }
+  ]
+}

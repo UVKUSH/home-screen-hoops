@@ -70,6 +70,44 @@ on — it removes the hard part of physics (two dozen balls resting on each othe
 without jittering or sinking) and reduces the engine to about a hundred lines.
 The resting pile is only simulated when tilt is switched on.
 
+## The leaderboard
+
+When the last shot is gone you can **keep going**, or put your name up. Only the
+name appears on the board — the email or phone is stored privately and no API
+route ever reads it back out.
+
+**It's switched off until you deploy the backend.** Until then the game plays
+exactly the same, the "Get on the leaderboard" button simply isn't there.
+
+To switch it on:
+
+```bash
+cd worker && ./setup.sh
+```
+
+That signs you into Cloudflare, creates the D1 database, applies the schema,
+sets a rate-limit salt, deploys the Worker, and writes its URL into
+`js/config.js`. Then commit and push and it's live.
+
+To read the signups:
+
+```bash
+npx wrangler d1 execute hoops --remote --command "SELECT name, contact, score, at FROM scores ORDER BY at DESC LIMIT 50"
+```
+
+A few things worth knowing:
+
+- **You're now holding other people's contact details.** They're in your
+  Cloudflare account, not in this repo — but they're real personal data, so
+  tell people what you'll use them for and delete them when you're done.
+- Submissions are rate limited to 12/hour per IP, and IPs are stored only as a
+  salted, truncated hash.
+- Names are stripped of control, zero-width and bidi characters so nobody can
+  make their entry render as something other than what's stored. There's no
+  profanity filter — add one if this goes anywhere public.
+- Only `https://uvkush.github.io` and localhost may call the API. Change
+  `ALLOWED_ORIGINS` in `worker/wrangler.jsonc` if the site moves.
+
 ## Changing the icons
 
 Drop a PNG into `assets/icons/`, add it to [`js/apps.js`](js/apps.js), then
@@ -108,13 +146,19 @@ WebP needs iOS 14+ (2020). Older phones would show a blank grid.
 ## Tests
 
 ```bash
-node --test test/physics.test.js
+npm test
 ```
 
-Physics is the only part with real logic, so it's the part with tests: scoring
-must require a *downward* crossing between the posts, rim clangs must deflect,
-balls must not tunnel through the floor or walls, and the aim assist's predicted
-trajectory is checked against the actual integrator.
+The two parts with real logic are the parts with tests.
+
+**Physics** — scoring must require a *downward* crossing between the posts, rim
+clangs must deflect, balls must not tunnel through the floor or walls, and the
+aim assist's predicted trajectory is checked against the actual integrator.
+
+**Leaderboard input** — names are public and contact details are required, so
+both validators are pinned down: control/zero-width/bidi stripping, email and
+phone shapes, length caps, and the fact that `Number(null)` is `0` and must not
+sneak through as a valid score.
 
 ## Credit
 

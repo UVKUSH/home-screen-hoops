@@ -2,6 +2,7 @@ import { buildHomeScreen } from './homescreen.js';
 import { watchSpotlight } from './longpress.js';
 import { createGame } from './game.js';
 import { runSplash } from './splash.js';
+import { wireInstallHelp } from './leaderboard.js';
 
 const EXIT_STRIP = 26; // bottom edge zone reserved for the iOS-style home swipe
 const EXIT_PULL  = 55; // how far up you drag it to bail out
@@ -18,7 +19,7 @@ if (location.search.includes('debug')) window.hoops = game;
 let exitFrom = null;
 
 addEventListener('pointerdown', (e) => {
-  if (e.target.closest('#scorecard')) return;
+  if (e.target.closest('#scorecard, #install')) return;
   if (game.state !== 'play') return;
 
   // bottom edge = "put my phone back", everywhere else = shoot
@@ -41,8 +42,7 @@ const letGo = () => { exitFrom = null; game.release(); };
 addEventListener('pointerup', letGo, { passive: true });
 addEventListener('pointercancel', letGo, { passive: true });
 
-document.getElementById('again').addEventListener('click', () => game.runItBack());
-document.getElementById('quit').addEventListener('click', () => game.goHome());
+wireInstallHelp();
 
 // stop Safari's own gestures from stealing the show
 addEventListener('contextmenu', (e) => e.preventDefault());

@@ -507,6 +507,217 @@ body.playing #hud { opacity: 1; }
 }
 #scorecard button.ghost { background: rgba(255,255,255,.1); color: #fff; }
 
+#scorecard button.link,
+#install button.link {
+  margin-top: 16px;
+  padding: 4px;
+  background: none;
+  color: rgba(255,255,255,.5);
+  font: 500 13px/1.3 -apple-system, system-ui, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ttl {
+  margin: 8px 0 20px;
+  font: 700 22px/1.2 -apple-system, system-ui, sans-serif;
+}
+
+/* ── sign-up form ─────────────────────────────────────────────── */
+.field {
+  display: block;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  font: 600 11px/1 -apple-system, system-ui, sans-serif;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+.field input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  background: rgba(255,255,255,.07);
+  color: #fff;
+  /* 16px minimum or iOS zooms the whole page in when the field is focused */
+  font: 400 16px/1 -apple-system, system-ui, sans-serif;
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: auto;
+}
+.field input::placeholder { color: rgba(255,255,255,.32); }
+.field input:focus {
+  outline: none;
+  border-color: #ff9f0a;
+  background: rgba(255,255,255,.11);
+}
+
+/* tap-to-finish email endings */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: -6px 0 14px;
+}
+.chips[hidden] { display: none; }
+/* the id keeps this ahead of the full-width `#scorecard button` rule */
+#scorecard .chip {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  padding: 7px 11px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.82);
+  font: 500 13px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+#scorecard .chip:active {
+  background: rgba(255,159,10,.24);
+  border-color: #ff9f0a;
+}
+
+.err {
+  margin: -4px 0 12px;
+  font: 500 13px/1.35 -apple-system, system-ui, sans-serif;
+  color: #ff6b6b;
+  text-align: left;
+}
+
+/* ── the board ────────────────────────────────────────────────── */
+.you {
+  margin-bottom: 14px;
+  font: 700 20px/1 -apple-system, system-ui, sans-serif;
+  color: #ff9f0a;
+}
+.board {
+  max-height: 42vh;
+  margin: 0 0 18px;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.board li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 11px;
+  font: 500 15px/1 -apple-system, system-ui, sans-serif;
+}
+.board li.me { background: rgba(255,159,10,.16); }
+.board .pos {
+  width: 22px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,.4);
+  text-align: right;
+}
+.board .who {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.board .pts {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── add to home screen ───────────────────────────────────────── */
+#install {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.6);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+#install[hidden] { display: none; }
+#install .card {
+  width: min(320px, 82vw);
+  padding: 28px 24px 22px;
+  border-radius: 28px;
+  background: rgba(28,28,30,.94);
+  border: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+}
+.steps {
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 15px;
+  font: 400 14px/1.45 -apple-system, system-ui, sans-serif;
+  color: rgba(255,255,255,.82);
+}
+.steps .n {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #ff9f0a;
+  color: #1c1c1e;
+  font: 700 12px/21px -apple-system, system-ui, sans-serif;
+  text-align: center;
+}
+.steps b { color: #fff; }
+.ios-share {
+  vertical-align: -4px;
+  margin: 0 1px;
+  color: #0a84ff;
+}
+#install button {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 15px;
+  background: #ff9f0a;
+  color: #1c1c1e;
+  font: 600 16px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+/* ── toast ────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 32px);
+  z-index: 220;
+  transform: translate(-50%, 12px);
+  max-width: 82vw;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(28,28,30,.94);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  font: 500 14px/1.3 -apple-system, system-ui, sans-serif;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s ease, transform .28s ease;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
 /* ── small screens ────────────────────────────────────────── */
 @media (max-height: 700px) {
   :root { --icon: 56px; --gap-y: 14px; }

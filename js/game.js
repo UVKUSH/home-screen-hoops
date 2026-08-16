@@ -4,6 +4,7 @@ import { createHoop } from './hoop.js';
 import { toBalls, homeAgain } from './transform.js';
 import { resetSpotlight } from './longpress.js';
 import { createTilt } from './tilt.js';
+import { createScorecard } from './leaderboard.js';
 
 // Where the loaded ball waits. Kept above the pile so the ball you're about to
 // shoot is never buried in it, and pushed to the RIGHT so there's real diagonal
@@ -20,7 +21,10 @@ const SAMPLE_MS  = 80;    // flick speed is measured over the last 80ms only.
 export function createGame() {
   const hud   = document.getElementById('hud');
   const flash = document.getElementById('flash');
-  const card  = document.getElementById('scorecard');
+  const scorecard = createScorecard({
+    onAgain: () => runItBack(),
+    onHome:  () => goHome(),
+  });
   const hint  = document.getElementById('hint');
   const tilt  = createTilt();
 
@@ -268,15 +272,12 @@ export function createGame() {
     loaded = null;
     hint.classList.remove('show');
     tilt.hide();
-    document.getElementById('final-score').textContent = score;
-    document.getElementById('final-total').textContent = `/ ${total}`;
-    document.getElementById('final-rank').textContent = rankFor(score, total);
-    card.classList.add('show');
+    scorecard.open(score, total, rankFor(score, total));
   }
 
   // ── restart / exit ──────────────────────────────────────────
   function runItBack() {
-    card.classList.remove('show');
+    scorecard.close();
     score = 0;
     shots = 0;
     dropT = 0;
@@ -301,7 +302,7 @@ export function createGame() {
 
   async function goHome() {
     if (state === 'home') return;
-    card.classList.remove('show');
+    scorecard.close();
     state = 'home';
     active = null;
     loaded = null;
@@ -331,6 +332,8 @@ export function createGame() {
     get shots() { return shots; },
     get hoop() { return hoop; },
     get world() { return world; },
+    /** Jump straight to the scorecard. Only reachable via ?debug. */
+    forceFinish(fakeScore = score) { score = fakeScore; finish(); },
   };
 }
 

@@ -55,6 +55,13 @@ export const TUNE = {
                       // full corner-to-corner sweep around shot 11
 };
 
+// Where the leaderboard backend lives. Leave it empty and the leaderboard is
+// simply off — the game plays exactly the same, the "Get on the leaderboard"
+// button just doesn't appear. `worker/setup.sh` fills this in after deploying.
+export const API = {
+  apiBase: '',
+};
+
 // Ranks shown on the scorecard, checked from the top down. Kept as fractions
 // of the shots taken, because a page with 16 apps gives you fewer than 24.
 export const RANKS = [
