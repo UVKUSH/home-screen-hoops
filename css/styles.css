@@ -89,7 +89,8 @@ body.playing #dim { opacity: .62; }
   inset: 0;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--safe-t) + 6px) 0 calc(var(--safe-b) + 8px);
+  /* +22px stands in for the status bar, which is now fixed chrome outside #home */
+  padding: calc(var(--safe-t) + 28px) 0 calc(var(--safe-b) + 8px);
   transition: opacity .35s ease;
 }
 body.playing #home { pointer-events: none; }
@@ -98,8 +99,15 @@ body.playing #dots,
 body.playing #dock { opacity: 0; }
 
 /* ── status bar ───────────────────────────────────────────── */
+/* Chrome, not home screen: fixed above every app screen, exactly the way the
+   real one behaves. #home carries the matching padding so the icon grid starts
+   in the same place it always did. */
 #statusbar {
-  flex: none;
+  position: fixed;
+  top: var(--safe-t);
+  left: 0;
+  right: 0;
+  z-index: 95;
   height: 22px;
   padding: 0 30px;
   display: flex;
@@ -835,6 +843,113 @@ body.playing #hud { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   #install, #install .card, #install .point-down { animation: none; }
+}
+
+/* ── the leaderboard, as an app ────────────────────────────────
+   Above the home screen, below the home bar (z 90) — so the bar stays put as
+   chrome and as the way out, the way it does when you leave a real app. */
+#board-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-t) + 40px) 22px calc(var(--safe-b) + 26px);
+  background: linear-gradient(#12131a 0%, #08090f 100%);
+  /* slides up from the bottom, like an app opening */
+  transform: translateY(100%);
+  transition: transform .42s cubic-bezier(.32,.72,0,1);
+}
+#board-screen[hidden] { display: none; }
+#board-screen.up { transform: none; }
+
+.board-top {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.board-top h1 {
+  margin: 0;
+  font: 700 32px/1.1 -apple-system, system-ui, sans-serif;
+  letter-spacing: -.5px;
+  color: #fff;
+}
+.board-done {
+  flex: none;
+  padding: 6px 2px;
+  border: 0;
+  background: none;
+  color: #ff9f0a;
+  font: 600 17px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+.board-sub {
+  flex: none;
+  margin: 4px 0 18px;
+  font: 500 13px/1 -apple-system, system-ui, sans-serif;
+  color: rgba(255,255,255,.45);
+}
+
+/* the four states share this box; exactly one is ever not [hidden] */
+.board-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.board-body > [hidden] { display: none; }
+
+/* the list, unlike the one on the scorecard, gets the whole screen */
+#board-screen .board {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  color: #fff;
+}
+#board-screen .board li { padding: 12px 12px; }
+#board-screen .board li.me {
+  background: rgba(255,159,10,.16);
+  box-shadow: inset 0 0 0 1px rgba(255,159,10,.3);
+}
+
+.board-skel { display: flex; flex-direction: column; gap: 9px; }
+.board-skel i {
+  height: 43px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.055);
+  animation: skel 1.3s ease-in-out infinite;
+}
+.board-skel i:nth-child(2) { animation-delay: .13s; }
+.board-skel i:nth-child(3) { animation-delay: .26s; }
+.board-skel i:nth-child(4) { animation-delay: .39s; }
+@keyframes skel { 50% { background: rgba(255,255,255,.11); } }
+
+.board-note {
+  margin: 40px 0 0;
+  font: 500 15px/1.5 -apple-system, system-ui, sans-serif;
+  color: rgba(255,255,255,.5);
+  text-align: center;
+}
+/* an actual problem, so it reads a shade louder than "no scores yet" */
+.board-err { color: rgba(255,255,255,.72); }
+.board-retry {
+  display: block;
+  margin: 18px auto 0;
+  padding: 11px 26px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  font: 600 15px/1 -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #board-screen { transition: none; }
+  .board-skel i { animation: none; }
 }
 
 /* ── the hidden dials ─────────────────────────────────────────── */

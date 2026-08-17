@@ -33,9 +33,10 @@ function classesIn(src) {
 const styles = (sel) => new RegExp(`\\${sel}(?![\\w-])`).test(css);
 
 const PANELS = [
-  { id: 'uvy',     src: 'js/uvy.js' },
-  { id: 'dials',   src: 'js/dials.js' },
-  { id: 'install', src: 'js/install.js' },
+  { id: 'uvy',          src: 'js/uvy.js' },
+  { id: 'dials',        src: 'js/dials.js' },
+  { id: 'install',      src: 'js/install.js' },
+  { id: 'board-screen', src: 'js/boardscreen.js' },
 ];
 
 for (const { id, src } of PANELS) {

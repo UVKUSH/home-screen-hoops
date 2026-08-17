@@ -61,6 +61,15 @@ export const TUNE = {
                       // full corner-to-corner sweep around shot 11
 };
 
+// The iOS-style "put my phone away" swipe. One definition, because the game and
+// the leaderboard screen are both leant on it — a swipe that means one thing in
+// the game and something subtly different one screen over is the kind of detail
+// that gives the illusion away.
+export const HOME_SWIPE = {
+  strip: 26,   // px up from the bottom edge where the gesture may start
+  pull:  55,   // px you drag it before the screen goes away
+};
+
 // Where the leaderboard backend lives. Leave it empty and the leaderboard is
 // simply off — the game plays exactly the same, the "Get on the leaderboard"
 // button just doesn't appear. `worker/setup.sh` fills this in after deploying.

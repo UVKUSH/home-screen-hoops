@@ -1,4 +1,26 @@
-import { leaderboardOn, fetchTop, submitScore } from './api.js';
+import { leaderboardOn, submitScore } from './api.js';
+import { renderRows } from './board.js';
+
+// The name the player last put on the board. The Reminders screen highlights
+// it, so opening the board cold still shows you where you stand. Only the
+// display name — the one already public on the board — is kept.
+const NAME_KEY = 'hoops:name';
+
+export function rememberedName() {
+  try {
+    return localStorage.getItem(NAME_KEY);
+  } catch {
+    return null;   // private mode, or storage switched off
+  }
+}
+
+function remember(name) {
+  try {
+    localStorage.setItem(NAME_KEY, name);
+  } catch {
+    /* not worth interrupting a submission over */
+  }
+}
 
 const SHARE_TEXT = 'Hold down the Search bar on this and watch what happens 🏀';
 
@@ -114,6 +136,7 @@ export function createScorecard({ onAgain, onHome }) {
 
     try {
       const { rank, top } = await submitScore({ name, contact: who, ...last });
+      remember(name);
       renderBoard(top, rank, name);
       show('board');
     } catch (err) {
@@ -131,19 +154,8 @@ export function createScorecard({ onAgain, onHome }) {
 
   // ── the board ───────────────────────────────────────────────
   function renderBoard(top, rank, name) {
-    boardEl.replaceChildren();
-    (top ?? []).forEach((row, i) => {
-      const li = document.createElement('li');
-      // the player's own row is highlighted, matched on the position we were
-      // given rather than the name, so a namesake doesn't light up too
-      if (rank && i + 1 === rank && row.name === name) li.className = 'me';
-      li.innerHTML =
-        `<span class="pos">${i + 1}</span>` +
-        `<span class="who"></span>` +
-        `<span class="pts">${Number(row.score)}</span>`;
-      li.querySelector('.who').textContent = row.name;   // never as HTML
-      boardEl.appendChild(li);
-    });
+    // shared with the Reminders app screen — see js/board.js
+    renderRows(boardEl, top, { rank, name });
 
     youEl.textContent = rank
       ? (rank <= (top?.length ?? 0) ? `You're #${rank}` : `You're #${rank} — keep at it`)

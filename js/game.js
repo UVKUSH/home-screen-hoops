@@ -4,7 +4,7 @@ import { createHoop } from './hoop.js';
 import { toBalls, homeAgain } from './transform.js';
 import { resetSpotlight } from './longpress.js';
 import { createTilt } from './tilt.js';
-import { createScorecard } from './leaderboard.js';
+import { createScorecard } from './scorecard.js';
 import * as sound from './sound.js';
 import { ember, clearEmbers } from './fire.js';
 

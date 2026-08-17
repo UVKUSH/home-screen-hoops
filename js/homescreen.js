@@ -3,6 +3,20 @@ import { COLS, ROWS, INDEX } from './sprite.js';
 import { LIVE_ICONS, liveArt, startLiveIcons } from './liveicons.js';
 import { countSettingsTap } from './dials.js';
 import { showUvy } from './uvy.js';
+import { showBoard } from './boardscreen.js';
+import { leaderboardOn } from './api.js';
+
+/**
+ * The icons that actually do something. Each returns true when it handled the
+ * tap; anything else — including Settings on taps one to six — falls through to
+ * the wobble, so a secret in progress still looks like a dead icon.
+ */
+const OPENS = {
+  settings:  countSettingsTap,
+  uvy:       () => (showUvy(), true),
+  // with no backend there's no board to open, so Reminders is just an icon
+  reminders: () => leaderboardOn() && (showBoard(), true),
+};
 
 // Basketball seams, drawn over the icon once it goes round.
 // viewBox is 0-100 so it scales to whatever the icon size is.
@@ -47,12 +61,10 @@ function makeIcon(app) {
 
   el.innerHTML = art + `<span class="name">${app.name}</span>`;
 
-  // Nothing actually opens — just a little "nope" wobble so people keep poking.
+  // Mostly nothing opens — just a little "nope" wobble so people keep poking.
   el.addEventListener('click', () => {
     if (document.body.classList.contains('playing')) return;
-    // seven taps on Settings opens the real dials
-    if (app.id === 'settings' && countSettingsTap()) return;
-    if (app.id === 'uvy') { showUvy(); return; }
+    if (OPENS[app.id]?.()) return;
     el.classList.remove('nope');
     void el.offsetWidth;        // restart the animation
     el.classList.add('nope');

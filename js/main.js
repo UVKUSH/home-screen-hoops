@@ -1,12 +1,9 @@
 import { buildHomeScreen } from './homescreen.js';
 import { watchSpotlight } from './longpress.js';
 import { createGame } from './game.js';
-import { TUNE } from './config.js';
+import { TUNE, HOME_SWIPE } from './config.js';
 import { runSplash } from './splash.js';
 import { wireInstallHelp, maybeShowInstall } from './install.js';
-
-const EXIT_STRIP = 26; // bottom edge zone reserved for the iOS-style home swipe
-const EXIT_PULL  = 55; // how far up you drag it to bail out
 
 buildHomeScreen();
 runSplash();
@@ -24,7 +21,7 @@ addEventListener('pointerdown', (e) => {
   if (game.state !== 'play') return;
 
   // bottom edge = "put my phone back", everywhere else = shoot
-  if (e.clientY > innerHeight - EXIT_STRIP) {
+  if (e.clientY > innerHeight - HOME_SWIPE.strip) {
     exitFrom = e.clientY;
     return;
   }
@@ -33,7 +30,7 @@ addEventListener('pointerdown', (e) => {
 
 addEventListener('pointermove', (e) => {
   if (exitFrom !== null) {
-    if (exitFrom - e.clientY > EXIT_PULL) { exitFrom = null; game.goHome(); }
+    if (exitFrom - e.clientY > HOME_SWIPE.pull) { exitFrom = null; game.goHome(); }
     return;
   }
   game.moveDrag(e);
