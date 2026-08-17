@@ -288,6 +288,12 @@ Get one from the Cloudflare dashboard under **Analytics & Logs → Web Analytics
 Add a site**. You then read browser and device breakdowns there; nothing is
 stored in this project or in D1.
 
+**Enter a hostname, not a URL** — `uvkush.github.io`, with no `https://` and no
+path. Cloudflare matches hostnames by postfix, so one entry covers every path on
+it. That also means it covers every *other* project published to the same
+`github.io` hostname, so if you add the beacon to one of those too, both land in
+the same bucket.
+
 That token belongs in the page. It says which site a pageview counts towards, it
 grants nothing and reads nothing back — it's public by design, and committing it
 isn't a leak.
@@ -303,6 +309,18 @@ It sets no cookies and identifies nobody, so unlike the contact details there's
 nothing here to disclose, retain or delete. If you want per-visitor detail
 instead, that's a tracking log and it inherits all three of those obligations —
 worth being deliberate about rather than drifting into.
+
+Two things to expect before you read anything into the numbers:
+
+- **Ad blockers block it.** uBlock, Brave and DuckDuckGo all stop the beacon, and
+  Cloudflare says so plainly. Treat the counts as a floor, not a census — and
+  expect the undercount to skew by browser, which is awkward given browsers are
+  the thing being measured.
+- **Detail fades.** Unsampled for 7 days, then aggregated to roughly 10%.
+
+The beacon is loaded as `type="module"`, which is how Cloudflare ships and
+documents it. The older `<script defer>` form may not run at all — and a beacon
+that silently doesn't fire is indistinguishable from a site with no visitors.
 
 ## Tests
 

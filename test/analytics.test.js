@@ -11,8 +11,16 @@ const SITE = 'uvkush.github.io';
 test('a configured token on a real host loads the beacon', () => {
   const a = beaconAttrs(TOKEN, SITE);
   assert.equal(a.src, 'https://static.cloudflareinsights.com/beacon.min.js');
-  assert.equal(a.defer, true);
   assert.equal(a['data-cf-beacon'], JSON.stringify({ token: TOKEN }));
+});
+
+// Cloudflare ships and documents the beacon as a module. Loading it as a classic
+// deferred script — the older documented form — may mean it never runs, and a
+// beacon that silently doesn't fire looks exactly like a site with no visitors.
+test('the beacon is loaded as a module', () => {
+  const a = beaconAttrs(TOKEN, SITE);
+  assert.equal(a.type, 'module');
+  assert.equal(a.defer, undefined, 'type=module is already deferred');
 });
 
 // An unconfigured build must make no request at all. A placeholder token in the

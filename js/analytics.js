@@ -33,9 +33,12 @@ export function beaconAttrs(token = ANALYTICS.token, hostname = location.hostnam
 
   return {
     src: BEACON,
-    defer: true,
-    // JSON.stringify does the escaping, so a token with a quote in it can't
-    // break out of the attribute
+    // Cloudflare ships the beacon as a module and documents it that way. A
+    // classic <script defer> was the old form and may simply not run.
+    // type=module is deferred by design, so nothing is lost by dropping defer.
+    type: 'module',
+    // JSON.stringify does the escaping, so a token with a quote in it still
+    // arrives as one parseable value
     'data-cf-beacon': JSON.stringify({ token: clean }),
   };
 }
@@ -47,7 +50,7 @@ export function startAnalytics() {
   if (document.querySelector(`script[src="${BEACON}"]`)) return null;   // already there
 
   const el = document.createElement('script');
-  el.defer = attrs.defer;
+  el.type = attrs.type;
   el.src = attrs.src;
   el.setAttribute('data-cf-beacon', attrs['data-cf-beacon']);
   document.head.appendChild(el);
