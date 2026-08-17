@@ -4,6 +4,7 @@ import { createGame } from './game.js';
 import { TUNE, HOME_SWIPE } from './config.js';
 import { runSplash } from './splash.js';
 import { wireInstallHelp, maybeShowInstall } from './install.js';
+import { startAnalytics } from './analytics.js';
 
 buildHomeScreen();
 runSplash();
@@ -43,6 +44,9 @@ addEventListener('pointercancel', letGo, { passive: true });
 wireInstallHelp();
 // first visit only, and after the splash so the two don't collide
 maybeShowInstall({ delay: TUNE.splashMs + 700 });
+
+// no-op until a token is configured, and never on localhost
+startAnalytics();
 
 // stop Safari's own gestures from stealing the show
 addEventListener('contextmenu', (e) => e.preventDefault());

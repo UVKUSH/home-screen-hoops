@@ -70,6 +70,17 @@ export const HOME_SWIPE = {
   pull:  55,   // px you drag it before the screen goes away
 };
 
+// Cloudflare Web Analytics. Leave the token empty and no beacon is requested at
+// all — same idea as apiBase below.
+//
+// This token belongs in the page. It says which site a pageview counts towards;
+// it grants nothing and reads nothing back, so it is public by design and
+// committing it is not a leak. Get one from the Cloudflare dashboard under
+// Analytics & Logs -> Web Analytics -> Add a site.
+export const ANALYTICS = {
+  token: '',
+};
+
 // Where the leaderboard backend lives. Leave it empty and the leaderboard is
 // simply off — the game plays exactly the same, the "Get on the leaderboard"
 // button just doesn't appear. `worker/setup.sh` fills this in after deploying.

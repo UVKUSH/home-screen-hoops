@@ -90,6 +90,7 @@ js/boardscreen.js   the leaderboard as its own app   (tap Reminders)
 js/share.js         the share sheet, X, and the toast   (unit tested)
 js/install.js       add-to-home-screen, per browser   (unit tested)
 js/api.js           talking to the worker
+js/analytics.js     the Cloudflare beacon, off unless configured   (unit tested)
 js/main.js          input and the animation loop
 worker/             the leaderboard API (Cloudflare + D1)
 worker/privacy.sh   what's held on people, and how to stop holding it
@@ -269,6 +270,39 @@ Three things did it:
   queue behind the stylesheet and the module graph. Now they start with the HTML.
 
 WebP needs iOS 14+ (2020). Older phones would show a blank grid.
+
+Nothing on the page comes from anywhere else, with one optional exception: the
+Cloudflare Web Analytics beacon, if you switch it on. It's one deferred request
+and only loads when a token is set — see below.
+
+## Analytics
+
+Off by default. Set a token in [`js/config.js`](js/config.js) and the Cloudflare
+Web Analytics beacon loads:
+
+```js
+export const ANALYTICS = { token: 'your-token' };
+```
+
+Get one from the Cloudflare dashboard under **Analytics & Logs → Web Analytics →
+Add a site**. You then read browser and device breakdowns there; nothing is
+stored in this project or in D1.
+
+That token belongs in the page. It says which site a pageview counts towards, it
+grants nothing and reads nothing back — it's public by design, and committing it
+isn't a leak.
+
+Two things it deliberately doesn't do:
+
+- **No request at all when the token is empty**, which is why it lives in
+  `config.js` rather than being pasted into `index.html`. A placeholder token in
+  the markup would fail on every visit until it was filled in.
+- **Never loads on localhost**, so your own development isn't in your numbers.
+
+It sets no cookies and identifies nobody, so unlike the contact details there's
+nothing here to disclose, retain or delete. If you want per-visitor detail
+instead, that's a tracking log and it inherits all three of those obligations —
+worth being deliberate about rather than drifting into.
 
 ## Tests
 
