@@ -10,6 +10,13 @@
     "logs": { "head_sampling_rate": 1 }
   },
 
+  // The retention sweep — see sweep() in src/index.js. Daily at 04:10 UTC;
+  // it only ever clears expired personal data, so a missed run costs nothing
+  // but a day, and running it twice does nothing the second time.
+  "triggers": {
+    "crons": ["10 4 * * *"]
+  },
+
   // Which sites may call this API. Anything not listed gets a CORS refusal.
   // Localhost doesn't need naming — the Worker allows any local origin, whatever
   // port the dev server happened to pick. See isLocal() in src/index.js.

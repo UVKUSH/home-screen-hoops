@@ -3,10 +3,12 @@
  *
  *   GET  /api/top          -> the top scores. Name and score only.
  *   POST /api/score        -> submit { name, contact, score, total }
+ *   cron                   -> the retention sweep. See sweep() below.
  *
  * Contact details are written to the database and are never read back out by
  * any route — the public SELECTs name the columns explicitly rather than using
- * SELECT *, so a new column can't accidentally start being published.
+ * SELECT *, so a new column can't accidentally start being published. They also
+ * expire: see the retention section.
  */
 
 const TOP_LIMIT     = 25;
@@ -37,6 +39,20 @@ export default {
         path: url.pathname,
       }));
       return json({ error: 'Something went wrong. Try again.' }, 500, cors);
+    }
+  },
+
+  /**
+   * The retention sweep, on the cron in wrangler.jsonc. Logged either way — a
+   * privacy promise that silently stopped being kept is worse than none.
+   */
+  async scheduled(event, env) {
+    try {
+      const cleared = await sweep(env);
+      console.log(JSON.stringify({ message: 'retention sweep', ...cleared }));
+    } catch (err) {
+      console.error(JSON.stringify({ message: 'retention sweep failed', error: err?.message }));
+      throw err;              // let it show as a failed run rather than a quiet no-op
     }
   },
 };
@@ -175,6 +191,51 @@ async function hashIp(request, env) {
     .slice(0, 12)
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+// ── retention ─────────────────────────────────────────────────
+/**
+ * Personal data gets an expiry date; scores don't.
+ *
+ * The form asks for an email or phone and promises to keep it private. Keeping
+ * it private forever is not the same as keeping it forever — the reason it was
+ * collected, being able to reach whoever is at the top, stops applying long
+ * before the score stops being interesting. So the private half expires and the
+ * public half doesn't: the row survives with its name and score, which is the
+ * whole point of a leaderboard, and the contact is emptied out from under it.
+ *
+ * ip_hash goes sooner. It exists to count submissions in the last hour and is
+ * dead weight after that; the week is slack for looking into a burst of abuse.
+ */
+const KEEP_CONTACT_DAYS = 90;
+const KEEP_IP_DAYS = 7;
+const DAY_MS = 86_400_000;
+
+/** Anything stamped before these is past its purpose. Pure, so it can be tested. */
+export function retentionCutoffs(now, keep = {}) {
+  const contactDays = keep.contactDays ?? KEEP_CONTACT_DAYS;
+  const ipDays = keep.ipDays ?? KEEP_IP_DAYS;
+  return { contact: now - contactDays * DAY_MS, ip: now - ipDays * DAY_MS };
+}
+
+/**
+ * Clear out what's expired. Safe to run as often as you like — the WHERE clauses
+ * skip rows already dealt with, so a repeat sweep touches nothing.
+ *
+ * `contact` is NOT NULL in the schema, so it empties to '' rather than NULL.
+ */
+export async function sweep(env, now = Date.now(), keep) {
+  const cut = retentionCutoffs(now, keep);
+  const [contact, ip] = await env.DB.batch([
+    env.DB.prepare("UPDATE scores SET contact = '' WHERE at < ? AND contact != ''")
+      .bind(cut.contact),
+    env.DB.prepare('UPDATE scores SET ip_hash = NULL WHERE at < ? AND ip_hash IS NOT NULL')
+      .bind(cut.ip),
+  ]);
+  return {
+    contactsCleared: contact?.meta?.changes ?? 0,
+    ipsCleared: ip?.meta?.changes ?? 0,
+  };
 }
 
 // ── plumbing ──────────────────────────────────────────────────

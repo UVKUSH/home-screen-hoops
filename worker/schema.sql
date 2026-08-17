@@ -2,9 +2,17 @@
 --
 -- `contact` is personal data. Nothing in the Worker ever selects it, and the
 -- public queries name their columns explicitly so it can't leak by accident.
--- To read it, query the database directly:
---   npx wrangler d1 execute hoops --remote \
---     --command "SELECT name, contact, score, at FROM scores ORDER BY at DESC"
+--
+-- It also expires. A daily cron runs sweep() in src/index.js, which empties
+-- `contact` after 90 days and `ip_hash` after 7 — the row, its name and its
+-- score stay, because that is what a leaderboard is for. Personal data is the
+-- only part with an end date.
+--
+-- ./privacy.sh is the way in for anything by hand:
+--   ./privacy.sh sweep            apply the retention rules now
+--   ./privacy.sh show   <contact> what is held on one person
+--   ./privacy.sh forget <contact> drop their details, keep their score
+--   ./privacy.sh erase  <contact> remove them from the board entirely
 
 CREATE TABLE IF NOT EXISTS scores (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,
