@@ -3,3 +3,21 @@ node_modules/
 
 # the untouched originals — the web-ready copies live in assets/
 assest/
+
+# Wrangler's local state. The cache holds the signed-in Cloudflare account id
+# and the account's display name, which is an email address — none of it
+# belongs in a public repo.
+.wrangler/
+worker/.wrangler/
+
+# Secrets live in `wrangler secret put`, never on disk. These are the files
+# that would hold them if anyone ever took a shortcut.
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.npmrc
+.netrc
