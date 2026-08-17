@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { beaconAttrs } from '../js/analytics.js';
+import { ANALYTICS } from '../js/config.js';
 
 // beaconAttrs takes its token and hostname as arguments, so the decision — load
 // a beacon or not, and with what — is checkable without a DOM or a page.
@@ -25,10 +26,21 @@ test('the beacon is loaded as a module', () => {
 
 // An unconfigured build must make no request at all. A placeholder token in the
 // markup would fail on every visit instead, which is the reason this is gated.
+//
+// `undefined` is deliberately not in this list: omitting the argument means "use
+// the configured token", which is a different case and is covered below. Having
+// it here made the test pass only for as long as config.js happened to be empty.
 test('no token means no beacon', () => {
-  for (const t of [undefined, null, '', '   ', '\n']) {
-    assert.equal(beaconAttrs(t, SITE), null, JSON.stringify(t));
+  for (const t of [null, '', '   ', '\n', '\t ']) {
+    assert.equal(beaconAttrs(t, SITE), null, `token ${String(JSON.stringify(t))}`);
   }
+});
+
+test('omitting the token falls back to the configured one', () => {
+  // whatever config.js currently holds, the fallback must be that and not empty
+  const configured = beaconAttrs(undefined, SITE);
+  const explicit = beaconAttrs(ANALYTICS.token, SITE);
+  assert.deepEqual(configured, explicit);
 });
 
 test('a token is trimmed before use, so a stray newline still works', () => {

@@ -78,7 +78,7 @@ export const HOME_SWIPE = {
 // committing it is not a leak. Get one from the Cloudflare dashboard under
 // Analytics & Logs -> Web Analytics -> Add a site.
 export const ANALYTICS = {
-  token: '',
+  token: 'e5aedf6ece5d4499a70f629c15e88ff2',
 };
 
 // Where the leaderboard backend lives. Leave it empty and the leaderboard is
