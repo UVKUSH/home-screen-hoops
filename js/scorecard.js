@@ -1,5 +1,6 @@
 import { leaderboardOn, submitScore } from './api.js';
 import { renderRows } from './board.js';
+import { shareLink, shareOnX } from './share.js';
 
 // The name the player last put on the board. The Reminders screen highlights
 // it, so opening the board cold still shows you where you stand. Only the
@@ -21,13 +22,6 @@ function remember(name) {
     /* not worth interrupting a submission over */
   }
 }
-
-const SHARE_TEXT = 'Hold down the Search bar on this and watch what happens 🏀';
-
-const SHARE_URL = () => location.origin + location.pathname;
-
-// X gets its own wording — reusing the share text put the basketball in twice
-const X_TAGLINE = 'Hold down the Search bar and watch the phone fall apart.';
 
 // Tap-to-finish email endings. Typing "@gmail.com" on a phone keyboard is a
 // lot of taps for something almost everyone picks from the same short list.
@@ -162,20 +156,12 @@ export function createScorecard({ onAgain, onHome }) {
       : '';
   }
 
-  document.getElementById('share').addEventListener('click', shareIt);
+  document.getElementById('share').addEventListener('click', shareLink);
 
-  // X opens in a new tab rather than replacing the game — on a home-screen web
-  // app that would otherwise dump the player out into Safari and lose the round
+  // `last` is read at click time, not bound now: the board panel's copy of this
+  // button exists before a score does
   for (const btn of root.querySelectorAll('[data-share-x]')) {
-    btn.addEventListener('click', () => {
-      const text = last.total
-        ? `I scored ${last.score}/${last.total} on Home Screen Hoops 🏀\n\n${X_TAGLINE}`
-        : `Home Screen Hoops 🏀\n\n${X_TAGLINE}`;
-      const url = 'https://x.com/intent/post'
-        + `?text=${encodeURIComponent(text)}`
-        + `&url=${encodeURIComponent(SHARE_URL())}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
+    btn.addEventListener('click', () => shareOnX(last));
   }
   document.getElementById('again2').addEventListener('click', () => { close(); onAgain(); });
   document.getElementById('quit2').addEventListener('click', () => { close(); onHome(); });
@@ -183,39 +169,6 @@ export function createScorecard({ onAgain, onHome }) {
   document.getElementById('quit').addEventListener('click', () => { close(); onHome(); });
 
   return { open, close };
-}
-
-// ── share ───────────────────────────────────────────────────────
-async function shareIt() {
-  const url = SHARE_URL();
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: 'Home Screen Hoops', text: SHARE_TEXT, url });
-      return;
-    } catch {
-      /* dismissed — fall through to copying */
-    }
-  }
-  try {
-    await navigator.clipboard.writeText(url);
-    toast('Link copied — go break someone else’s phone');
-  } catch {
-    toast(url);
-  }
-}
-
-let toastTimer = null;
-function toast(text) {
-  let el = document.getElementById('toast');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'toast';
-    document.body.appendChild(el);
-  }
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
 // ── shared with the server, deliberately loose ──────────────────
