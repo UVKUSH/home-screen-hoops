@@ -22,9 +22,11 @@ addEventListener('beforeinstallprompt', (e) => {
 let panel = null;
 
 // ── who are we talking to ─────────────────────────────────────
-function detect() {
-  const ua = navigator.userAgent;
-  const iPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+/** @param {{userAgent: string, platform?: string, maxTouchPoints?: number}} [nav] */
+export function detect(nav = navigator) {
+  const ua = nav.userAgent;
+  // An iPad reports itself as a Mac; the touch points are what give it away.
+  const iPadOS = nav.platform === 'MacIntel' && nav.maxTouchPoints > 1;
   const ios = /iPhone|iPad|iPod/.test(ua) || iPadOS;
   const android = /Android/.test(ua);
 
@@ -63,11 +65,23 @@ const PLUS_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <path d="M12 8.4v7.2M8.4 12h7.2" fill="none" stroke="currentColor"
         stroke-width="1.9" stroke-linecap="round"/></svg>`;
 
-function script() {
-  const d = detect();
+/**
+ * Which walkthrough this visitor gets.
+ *
+ * Every branch carries an `id`. Nothing in the UI uses it — it exists so the
+ * tests can pin *which* walkthrough was chosen without pinning its wording, and
+ * the copy can then be reworded freely without a test to update.
+ *
+ * @param {{nav?: object, nativePrompt?: boolean}} [opts]
+ *   Both default to the live environment. The tests pass their own so the whole
+ *   matrix can be checked without a browser.
+ */
+export function script({ nav = navigator, nativePrompt } = {}) {
+  const d = detect(nav);
 
-  if (deferredPrompt) {
+  if (nativePrompt ?? Boolean(deferredPrompt)) {
     return {
+      id: 'native',
       lead: 'One tap and it lives on your home screen — no address bar, no tabs.',
       steps: [],
       install: true,
@@ -76,6 +90,7 @@ function script() {
 
   if (d.ios && !d.iosOtherBrowser) {
     return {
+      id: 'ios-safari',
       lead: 'Two taps and it looks like a real phone.',
       steps: [
         { icon: SHARE_ICON, text: 'Tap <b>Share</b> at the bottom of Safari' },
@@ -87,6 +102,7 @@ function script() {
 
   if (d.iosOtherBrowser) {
     return {
+      id: 'ios-other',
       lead: 'This one needs Safari — other iPhone browsers can’t add it properly.',
       steps: [
         { icon: DOTS_ICON, text: 'Open this page in <b>Safari</b>' },
@@ -97,6 +113,7 @@ function script() {
 
   if (d.android && d.samsung) {
     return {
+      id: 'samsung',
       lead: 'Two taps and it looks like a real phone.',
       steps: [
         { icon: MENU_ICON, text: 'Tap the <b>menu</b> button' },
@@ -107,8 +124,11 @@ function script() {
 
   if (d.android) {
     return {
+      id: 'android',
       lead: 'Two taps and it looks like a real phone.',
       steps: [
+        // Firefox's is a hamburger, not three dots — naming the wrong glyph is
+        // exactly the kind of "helpful" instruction that strands people
         { icon: DOTS_ICON, text: `Tap the <b>${d.firefox ? 'menu' : 'three dots'}</b> at the top` },
         { icon: PLUS_ICON, text: 'Tap <b>Install</b> or <b>Add to Home screen</b>' },
       ],
@@ -117,6 +137,7 @@ function script() {
 
   // desktop, or something we don't recognise
   return {
+    id: 'desktop',
     lead: 'It’s built for a phone — open it there and add it to your home screen.',
     steps: [
       { icon: SHARE_ICON, text: 'Open this link on your phone' },
