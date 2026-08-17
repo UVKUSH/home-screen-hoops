@@ -178,15 +178,44 @@ async function hashIp(request, env) {
 }
 
 // ── plumbing ──────────────────────────────────────────────────
-function corsFor(request, env) {
+/**
+ * Is this origin someone's own machine?
+ *
+ * The dev server takes its port at runtime so several editors can serve the
+ * folder at once, which means there is no one port to name in ALLOWED_ORIGINS —
+ * pinning one would leave the leaderboard working only in whichever window got
+ * there first.
+ *
+ * Parsed rather than prefix-matched on purpose: "localhost" and
+ * "localhost.example.com" start with the same nine characters and only one of
+ * them is your machine. Letting these through costs nothing that isn't already
+ * available — the board is public and there are no cookies or credentials on
+ * this API, so anything a browser could do here, curl could already do without
+ * asking CORS first.
+ */
+function isLocal(origin) {
+  let url;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;                 // '', 'null', or anything unparseable
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+  return url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]';
+}
+
+export function corsFor(request, env) {
   const allowed = String(env.ALLOWED_ORIGINS ?? '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
   const origin = request.headers.get('origin') ?? '';
+  const ok = allowed.includes(origin) || isLocal(origin);
 
   return {
-    'access-control-allow-origin': allowed.includes(origin) ? origin : (allowed[0] ?? ''),
+    // A caller we don't know still gets a header, just not their own origin —
+    // the mismatch is what the browser refuses on.
+    'access-control-allow-origin': ok ? origin : (allowed[0] ?? ''),
     'access-control-allow-methods': 'GET, POST, OPTIONS',
     'access-control-allow-headers': 'content-type',
     'access-control-max-age': '86400',

@@ -11,8 +11,10 @@
   },
 
   // Which sites may call this API. Anything not listed gets a CORS refusal.
+  // Localhost doesn't need naming — the Worker allows any local origin, whatever
+  // port the dev server happened to pick. See isLocal() in src/index.js.
   "vars": {
-    "ALLOWED_ORIGINS": "https://uvkush.github.io,http://localhost:8765"
+    "ALLOWED_ORIGINS": "https://uvkush.github.io"
   },
 
   // database_id is filled in by ./setup.sh (or `npx wrangler d1 create hoops`)
