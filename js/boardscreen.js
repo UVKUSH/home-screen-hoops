@@ -17,16 +17,27 @@ import * as sound from './sound.js';
  * gesture is a click-drag nothing hints at, so there's a Done in the corner and
  * Esc for anyone who reaches for it.
  */
+// Matches the .42s slide in the stylesheet. Kept as a number here because the
+// screen has to be taken out of the tree after it has gone, and there is no
+// event that reliably says so — see closeBoard.
+const SLIDE_MS = 420;
+
 let screen = null;
 let open = false;
+let hideTimer = null;
 
 export function showBoard() {
   screen ??= build();
   open = true;
+  clearTimeout(hideTimer);
   document.getElementById('home').setAttribute('inert', '');
   screen.hidden = false;
-  // let the browser see hidden=false before the class that animates it
-  requestAnimationFrame(() => screen.classList.add('up'));
+  // Flush layout so the transition has a start point to move from. A rAF would
+  // read more naturally and it is what this was written as, but rAF does not
+  // run in a backgrounded tab: the screen would come back from the tab switch
+  // still sitting off the bottom of the window, with no way to get it up.
+  void screen.offsetWidth;
+  screen.classList.add('up');
   sound.star();
   load();
 }
@@ -36,10 +47,12 @@ function closeBoard() {
   open = false;
   screen.classList.remove('up');
   document.getElementById('home').removeAttribute('inert');
-  // stay in the tree until the slide-down finishes, or it vanishes mid-flight
-  screen.addEventListener('transitionend', () => {
-    if (!open) screen.hidden = true;
-  }, { once: true });
+  // Out of the tree once it has slid away — hidden rather than merely
+  // translated, so it stops being focusable and readable. Not on transitionend:
+  // under prefers-reduced-motion there is no transition, so no event ever comes
+  // and the screen would sit in the tree for good.
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => { if (!open) screen.hidden = true; }, SLIDE_MS);
 }
 
 // ── the fetch ─────────────────────────────────────────────────
