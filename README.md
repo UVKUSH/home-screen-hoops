@@ -71,21 +71,33 @@ body. That's what makes it read as "my phone broke" rather than "a game loaded".
 index.html          the fake home screen, and the splash
 js/config.js        all the tuning dials
 js/apps.js          which apps are on which page
-js/homescreen.js    builds the pages, dock, status bar, page swiping
+js/homescreen.js    builds the pages, dock, page swiping
 js/liveicons.js     the ticking Clock and the real-date Calendar
+js/splash.js        the loading screen, and when to let go of it
 js/longpress.js     the hold-to-break trigger
 js/transform.js     icons -> balls and back again
 js/physics.js       gravity, contacts, rim, scoring   (unit tested)
 js/hoop.js          the hoop, and how it sweeps
+js/tilt.js          gravity follows the phone   (iOS only)
 js/game.js          shots, score, streaks, scorecard
 js/sound.js         every noise, synthesised
 js/fire.js          the ember trail
 js/dials.js         the hidden tuning panel
 js/uvy.js           the star card
-js/leaderboard.js   the end screens, sharing, install help
+js/scorecard.js     the end screens: result, sign-up, board
+js/board.js         one ranked list, shared by the card and the screen   (unit tested)
+js/boardscreen.js   the leaderboard as its own app   (tap Reminders)
+js/share.js         the share sheet, X, and the toast   (unit tested)
+js/install.js       add-to-home-screen, per browser   (unit tested)
+js/api.js           talking to the worker
 js/main.js          input and the animation loop
 worker/             the leaderboard API (Cloudflare + D1)
+worker/privacy.sh   what's held on people, and how to stop holding it
 ```
+
+The status bar lives outside `#home`, as a direct child of `<body>`. It's phone
+chrome rather than part of the home screen, which is what lets it stay put when
+an app screen slides over the top — the way a real one does.
 
 The whole pile is simulated the whole time, which is what lets you pick up any
 ball and barge the others out of the way — and any number of shots can be in the
@@ -117,6 +129,13 @@ sprite cell the home screen uses, so it can't drift out of step with it. The
 card also points at the next secret — an easter egg nobody finds isn't much of a
 reward, and one hidden thing hinting at the next is how people end up hunting
 for the rest.
+
+**Tap Reminders** and the leaderboard opens as its own app — sliding up over the
+home screen, below the home bar, so the bar stays put as chrome and as the way
+out. Leaving is the same swipe, and the same two numbers, as quitting a game;
+`Done` and `Esc` are there for anyone on a desktop, where a drag up from the
+bottom edge is a gesture nothing hints at. If you've put your name up before, it
+finds your row.
 
 **The Clock and the Calendar tell the truth.** Real ticking hands, today's real
 date — exactly like iOS. They're drawn as live SVG rather than taken from the
@@ -164,24 +183,51 @@ That signs you into Cloudflare, creates the D1 database, applies the schema,
 sets a rate-limit salt, deploys the Worker, and writes its URL into
 `js/config.js`. Then commit and push and it's live.
 
-To read the signups:
+### Whose data you're now holding
+
+The form asks for an email or phone and promises to keep it private, which makes
+it your problem to keep. [`worker/privacy.sh`](worker/privacy.sh) is how:
 
 ```bash
-npx wrangler d1 execute hoops --remote --command "SELECT name, contact, score, at FROM scores ORDER BY at DESC LIMIT 50"
+cd worker
+./privacy.sh list                  # everyone whose details are still held
+./privacy.sh show   <contact>      # what's held on one person
+./privacy.sh forget <contact>      # drop their details, keep their score
+./privacy.sh erase  <contact>      # remove them from the board entirely
+./privacy.sh sweep                 # apply the retention rules now
 ```
 
-A few things worth knowing:
+Start with `list` — it prints the values the other commands take.
 
-- **You're now holding other people's contact details.** They're in your
-  Cloudflare account, not in this repo — but they're real personal data, so
-  tell people what you'll use them for and delete them when you're done.
+**Details expire on their own.** A daily cron runs `sweep()` in the Worker, which
+empties `contact` after 90 days and the IP hash after 7. The row, its name and
+its score all stay: a leaderboard that forgets its scores isn't a leaderboard, so
+only the private half has a lifetime. Keeping something private forever is not
+the same as keeping it forever, and the reason it was collected — reaching
+whoever is at the top — stops applying long before the score stops being
+interesting. Change the windows in
+[`worker/src/index.js`](worker/src/index.js) and keep `privacy.sh` in step.
+
+`forget` is usually the one you want: it clears the private half and leaves the
+name and score standing, so the board doesn't develop a hole where someone used
+to be.
+
+A few other things worth knowing:
+
 - Submissions are rate limited to 12/hour per IP, and IPs are stored only as a
-  salted, truncated hash.
+  salted, truncated hash — which is itself cleared after a week, the limiter only
+  ever looking back an hour.
+- No route reads `contact` back out. The public queries name their columns
+  explicitly rather than using `SELECT *`, so a new column can't quietly start
+  being published.
 - Names are stripped of control, zero-width and bidi characters so nobody can
   make their entry render as something other than what's stored. There's no
   profanity filter — add one if this goes anywhere public.
-- Only `https://uvkush.github.io` and localhost may call the API. Change
-  `ALLOWED_ORIGINS` in `worker/wrangler.jsonc` if the site moves.
+- `ALLOWED_ORIGINS` in [`worker/wrangler.jsonc`](worker/wrangler.jsonc) lists the
+  sites that may call the API; change it if yours moves. Any localhost origin is
+  allowed on top of that, whatever port the dev server picked, so the check is
+  done by parsing the origin rather than matching how it starts —
+  `localhost.example.com` is not your machine.
 
 ## Changing the icons
 
@@ -230,7 +276,11 @@ WebP needs iOS 14+ (2020). Older phones would show a blank grid.
 npm test
 ```
 
-The two parts with real logic are the parts with tests.
+No dependencies and nothing to install — it's `node --test` and the standard
+library. They also run on every push, via
+[`.github/workflows/test.yml`](.github/workflows/test.yml).
+
+The parts with real logic are the parts with tests.
 
 **Physics** — scoring must require a *downward* crossing between the posts, rim
 clangs must deflect, balls must not tunnel through the floor or walls, and the
@@ -240,6 +290,27 @@ aim assist's predicted trajectory is checked against the actual integrator.
 both validators are pinned down: control/zero-width/bidi stripping, email and
 phone shapes, length caps, and the fact that `Number(null)` is `0` and must not
 sneak through as a valid score.
+
+**CORS and retention** — that any localhost port is allowed but
+`localhost.example.com` is not, and that the retention sweep binds the right
+cutoffs, never says `DELETE`, and never assigns to a name or a score.
+
+**The install walkthrough** — which of the six sets of instructions each browser
+gets, over real user agent strings. It's regex-and-string logic, the kind that
+rots without failing: tighten one pattern and Samsung users quietly start being
+told to look for Chrome's three dots. Two cases earn their own tests — an iPad
+and a Mac send byte-identical user agents, so touch points are the only thing
+telling them apart, and a real install prompt has to beat all six branches.
+
+**Stylesheets for panels built at runtime** — `#uvy`, `#dials`, `#install` and
+`#board-screen` exist only once JavaScript makes them, so nothing in
+`index.html` mentions them and no amount of reading the markup tells you their
+styles went missing. That is not hypothetical: a commit once rewrote
+`styles.css` and took the UVY card and the hidden dials with it. Both kept
+"working" — handlers ran, elements landed in the DOM — while rendering as
+unstyled blocks behind the fixed home screen. The test reads the class names
+straight out of the modules, so a panel that grows an element is covered without
+anyone remembering to come back.
 
 ## Credit
 

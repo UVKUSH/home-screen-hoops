@@ -1,0 +1,46 @@
+# The tests only mean something if they run without being remembered.
+#
+# This repo once shipped with the UVY card and the hidden dials invisible: a
+# commit rewrote styles.css and took both CSS blocks with it. The JS still ran,
+# nothing threw, and the panels rendered as unstyled blocks behind the home
+# screen. test/styles.test.js catches that exact failure now — but only when
+# something runs it.
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # Deliberately no cache: there are no dependencies to cache, and
+          # pointing it at a lockfile that doesn't exist fails the step.
+
+      # Nothing installs anything in this job. The project has no dependencies
+      # and no lockfile, so `npm ci` would fail outright — `node --test` is the
+      # entire toolchain.
+      - name: Modules parse
+        # A syntax error in a module no test imports would otherwise ship: most
+        # of js/ is only ever loaded by a browser. This covers those files.
+        run: node --check js/*.js worker/src/*.js
+
+      - name: Build tools parse
+        run: python3 -m py_compile tools/*.py
+
+      - name: Shell scripts parse
+        # privacy.sh runs SQL against the live database; a typo here is not the
+        # place to find out.
+        run: bash -n worker/setup.sh worker/privacy.sh
+
+      - name: Tests
+        run: npm test
