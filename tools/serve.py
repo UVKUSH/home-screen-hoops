@@ -8,7 +8,11 @@ see no change, and go hunting for a bug that isn't there. This sends no-store
 on everything instead.
 
     python3 tools/serve.py [port]
+
+Port comes from the argument, else $PORT, else 8765. The env var is what lets
+several editors serve this folder at once without picking ports by hand.
 """
+import os
 import sys
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -26,7 +30,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
+    port = int(sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PORT") or 8765)
     server = ThreadingHTTPServer(("", port), partial(NoCacheHandler, directory="."))
     print(f"serving http://localhost:{port}  (no-cache)")
     try:
