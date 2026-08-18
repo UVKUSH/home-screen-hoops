@@ -187,8 +187,11 @@ which is probably right for something you hand to someone across a quiet table.
 
 ## The leaderboard
 
-When the last shot is gone you can **keep going**, share the score **on X**, or
-put your name up. Only the
+When the last shot is gone you can **keep going**, share the score, or put your
+name up. Sharing offers two destinations for the same post: **Share on X** goes
+straight into the X app's composer via its own `twitter://` scheme, and
+**Share…** opens the system sheet for Messages, WhatsApp, Notes and the rest.
+The second only appears where the browser has a share sheet to open. Only the
 name appears on the board — the email or phone is stored privately and no API
 route ever reads it back out.
 

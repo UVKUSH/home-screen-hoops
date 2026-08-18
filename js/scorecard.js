@@ -1,6 +1,6 @@
 import { leaderboardOn, submitScore } from './api.js';
 import { renderRows } from './board.js';
-import { shareLink, shareOnX } from './share.js';
+import { shareSheet, canShareSheet, shareOnX } from './share.js';
 
 // The name the player last put on the board. The Reminders screen highlights
 // it, so opening the board cold still shows you where you stand. Only the
@@ -156,7 +156,14 @@ export function createScorecard({ onAgain, onHome }) {
       : '';
   }
 
-  document.getElementById('share').addEventListener('click', shareLink);
+  // Two destinations, one post: X directly, or the system sheet for everywhere
+  // else. `last` is read at click time — the board panel's copies exist before
+  // any score does.
+  for (const btn of root.querySelectorAll('[data-share-any]')) {
+    // no sheet on this browser, so don't offer a button that can only apologise
+    btn.hidden = !canShareSheet();
+    btn.addEventListener('click', () => shareSheet(last));
+  }
 
   // `last` is read at click time, not bound now: the board panel's copy of this
   // button exists before a score does

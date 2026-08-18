@@ -6,8 +6,6 @@
  * they live here with the toast they both talk through.
  */
 
-const SHARE_TEXT = 'Hold down the Search bar on this and watch what happens 🏀';
-
 // What the post has to do: say what the thing is, say what to DO with it (nobody
 // discovers a hold-to-break gesture on their own), and give a reason to pass it
 // on. The prank is the reason — it is what the whole page is for.
@@ -103,24 +101,32 @@ export function shareOnX(result) {
              : 'Copied — open X and paste it');
 }
 
-/** The plain link, through the system share sheet where there is one. */
-export async function shareLink() {
-  const url = SHARE_URL();
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: 'Home Screen Hoops', text: SHARE_TEXT, url });
-      return;
-    } catch {
-      /* dismissed — fall through to copying */
-    }
+/**
+ * The same post, but let the player choose where it goes.
+ *
+ * The sheet reaches everything the phone knows about — Messages, WhatsApp, Notes
+ * — where the X button reaches exactly one place. Two buttons, one post, and the
+ * choice is the destination.
+ *
+ * navigator.share needs the gesture, so this is called straight from the click
+ * with nothing awaited in front of it.
+ */
+export function shareSheet(result) {
+  const body = xMessage(result);
+  const link = SHARE_URL();
+  const copied = navigator.clipboard?.writeText(`${body}\n\n${link}`);
+
+  if (!navigator.share) {                 // button is hidden in this case anyway
+    copied?.then(() => toast('Copied — paste it wherever you like')).catch(() => {});
+    return;
   }
-  try {
-    await navigator.clipboard.writeText(url);
-    toast('Link copied — go break someone else’s phone');
-  } catch {
-    toast(url);
-  }
+  navigator.share({ text: body, url: link })
+    .catch(() => { /* dismissed; the copy is there if they change their mind */ });
+  copied?.then(() => toast('Copied too, in case you’d rather paste it')).catch(() => {});
 }
+
+/** Whether the sheet exists to be offered at all. */
+export const canShareSheet = () => Boolean(navigator.share);
 
 let toastTimer = null;
 

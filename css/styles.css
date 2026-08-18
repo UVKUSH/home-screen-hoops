@@ -601,6 +601,21 @@ body.playing #hud { opacity: 1; }
   color: #fff;
   border: 1px solid rgba(255,255,255,.22);
 }
+/* The other destination. Quieter than the X button — it is the wider net, not
+   the headline action. */
+#scorecard button.sheet-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+}
+#scorecard button.sheet-share svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
 #scorecard button.x-share svg {
   width: 15px;
   height: 15px;
