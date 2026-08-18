@@ -193,11 +193,19 @@ straight into the X app's composer via its own `twitter://` scheme, and
 **Share…** opens the system sheet for Messages, WhatsApp, Notes and the rest.
 The second only appears where the browser has a share sheet to open.
 
-The post itself opens with **add this to your home screen**, not with the score.
-That is the thing worth converting on, and it is also the only way the gag works
-— in a browser tab the address bar gives it away on sight. Installed, there is no
-chrome at all. So the install line is the setup and the prank is what pays for
-it; the score goes last, because it means nothing to a stranger. Only the
+The post is written as a recipe for a prank rather than an advert for a game:
+save it to the home screen, tell a friend you found a hidden iPhone easter egg,
+hand them the phone, then watch them try it on theirs.
+
+The order is doing the work. Saving it is the thing worth converting on and the
+only way the trick lands — a browser tab has an address bar and gives it away on
+sight — but as a bare instruction it reads as homework, and nobody does homework
+for something they have not been sold. As step one of a prank they have already
+decided to pull, the same sentence is something they want to do.
+
+The last line is the real payoff, and it has nothing to do with this page: having
+seen it work, they will try it on their own phone, where nothing happens. The
+joke is not the basketballs. It is the ten seconds afterwards. Only the
 name appears on the board — the email or phone is stored privately and no API
 route ever reads it back out.
 

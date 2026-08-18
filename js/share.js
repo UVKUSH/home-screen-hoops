@@ -7,17 +7,23 @@
  */
 
 /*
- * The post leads with adding it to the home screen, because that is the thing
- * worth converting on — and because the gag does not work any other way. In a
- * browser tab, with an address bar across the top, it is obviously a web page.
- * Installed, there is no chrome at all and it is indistinguishable from the
- * phone it is imitating, which is the entire trick.
+ * The post is a recipe for a prank, not an advert for a game.
  *
- * So the install line is not an instruction the reader has to be talked into.
- * It is the setup, and the prank is the punchline that pays for it.
+ * That ordering does the work. Saving it to the home screen is the thing worth
+ * converting on and also the only way the trick lands — a browser tab has an
+ * address bar across the top and gives it away on sight — but as a bare
+ * instruction it reads as homework, and nobody does homework for something they
+ * have not been sold yet. Framed as step one of a prank they have already
+ * decided to pull, the same sentence is something they want to do.
+ *
+ * The last line is the actual payoff, and it is the part that has nothing to do
+ * with this page: having watched it work, they will try it on their own phone,
+ * where of course nothing happens. The joke is not the basketballs. It is the
+ * ten seconds afterwards when someone is holding down Search on a real iPhone.
  */
-const X_INSTALL = 'Add this to your home screen first — no address bar, no tabs, it just looks like your phone.';
-const X_GAG     = 'Then hand it to a friend and tell them to hold down the Search bar 🏀';
+const X_SETUP   = 'Save this to your home screen, then tell a friend you found a hidden iPhone easter egg and hand them your phone.';
+const X_TRIGGER = 'Tell them to hold down the Search bar 🏀';
+const X_PAYOFF  = 'Then watch them try it on their own phone.';
 
 export const SHARE_URL = () => location.origin + location.pathname;
 
@@ -31,7 +37,7 @@ export const SHARE_URL = () => location.origin + location.pathname;
  */
 export function xMessage({ score, total } = {}) {
   const brag = total ? `\n\nI got ${score}/${total}.` : '';
-  return `${X_INSTALL}\n\n${X_GAG}${brag}`;
+  return `${X_SETUP}\n\n${X_TRIGGER}\n\n${X_PAYOFF}${brag}`;
 }
 
 /**
