@@ -51,6 +51,10 @@
      paints on the very first frame. Pulling any of it from another file would
      mean a round trip before the loading screen itself could show up. -->
 <style>
+  /* ── the loading screen ──────────────────────────────────────
+     Roughly a second on screen, so everything here has to read at a glance.
+     The tile is the app icon behaving like a basketball, which is the trick the
+     whole game is built on — so the splash is a small promise of it. */
   #splash {
     position: fixed;
     inset: 0;
@@ -63,11 +67,18 @@
        background_color, so the launch screen, the splash and the safe areas
        iOS paints for itself are all one colour — nothing flashes white. */
     background: linear-gradient(#06304f 0%, #021733 100%);
-    transition: opacity .45s ease;
+    /* The exit: the whole screen lifts away and fades, the way an app opens.
+       Scaled here rather than on the tile so it composes with the dribble —
+       stopping that animation mid-flight would snap the transform and jump. */
+    transition: opacity .5s ease, transform .5s cubic-bezier(.36, 0, .2, 1);
     /* failsafe: if the scripts never run, don't trap anyone on a blank screen */
     animation: splash-bail 1ms linear 6s forwards;
   }
-  #splash.done { opacity: 0; pointer-events: none; }
+  #splash.done {
+    opacity: 0;
+    transform: scale(1.14);
+    pointer-events: none;
+  }
   @keyframes splash-bail { to { opacity: 0; visibility: hidden; } }
 
   /* The logo is black-on-yellow, so on a dark background it needs a light
@@ -80,18 +91,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 18px 40px rgba(0,0,0,.45);
-    animation: dribble 1.05s infinite;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+    /* Squash from the base, not the middle. A ball flattening against the floor
+       keeps its contact point still; scaling about the centre makes it sink
+       into the ground instead. */
+    transform-origin: 50% 100%;
+    /* Falls in first, then picks up the loop. The two never overlap — drop-in
+       has finished by the time dribble starts — so they can share `transform`
+       without fighting, and drop-in lands on exactly the pose dribble opens on,
+       which is what makes the handover invisible. */
+    animation: drop-in .42s cubic-bezier(.3, 0, .7, .5) both,
+               dribble 1.05s .42s infinite;
   }
-  #splash .tile svg { width: 78%; height: 78%; display: block; }
+  #splash .tile svg {
+    width: 78%;
+    height: 78%;
+    display: block;
+    /* A lean into the bounce rather than a spin. A full rotation on a face
+       reads as tumbling — this just gives it weight. */
+    animation: lean 1.05s .42s ease-in-out infinite;
+  }
 
   #splash .shadow {
-    width: 84px;
-    height: 10px;
-    margin-top: 12px;
+    width: 92px;
+    height: 11px;
+    margin-top: 13px;
     border-radius: 50%;
     background: #000;
-    animation: squash 1.05s infinite;
+    filter: blur(4px);
+    /* Hidden until the tile has landed — a shadow with nothing above it is a
+       smudge. The delay leaves it at this opacity until dribble takes over. */
+    opacity: 0;
+    animation: squash 1.05s .42s infinite;
   }
 
   #splash .by {
@@ -100,25 +131,59 @@
     letter-spacing: 2.6px;
     text-transform: uppercase;
     color: #fff;
-    opacity: .55;
+    opacity: 0;
+    animation: sign-in .45s ease .52s forwards;
   }
 
-  /* a dribble: falls fast, squashes on contact, springs back up */
+  /* Arrives from above and hands over at the top of the first bounce. */
+  @keyframes drop-in {
+    0%   { transform: translateY(-190px) scale(.9, 1.12); opacity: 0; }
+    55%  { opacity: 1; }
+    100% { transform: translateY(-34px) scale(1, 1); opacity: 1; }
+  }
+
+  /* A dribble, not a drop: the height holds because a hand keeps putting the
+     energy back. What sells it is the stretch on the way down and the fact that
+     contact is nearly instant — most of the cycle is spent in the air. */
   @keyframes dribble {
     0%   { transform: translateY(-34px) scale(1, 1);
-           animation-timing-function: cubic-bezier(.45,0,.9,.45); }
-    44%  { transform: translateY(0) scale(1.09, .9);
-           animation-timing-function: cubic-bezier(.1,.7,.3,1); }
-    54%  { transform: translateY(-6px) scale(.97, 1.03); }
+           animation-timing-function: cubic-bezier(.4, 0, .85, .5); }
+    36%  { transform: translateY(-8px) scale(.93, 1.09);
+           animation-timing-function: cubic-bezier(.8, 0, .9, .6); }
+    46%  { transform: translateY(0) scale(1.14, .85);
+           animation-timing-function: cubic-bezier(.05, .75, .35, 1); }
+    56%  { transform: translateY(-12px) scale(.95, 1.06); }
     100% { transform: translateY(-34px) scale(1, 1); }
   }
-  @keyframes squash {
-    0%, 100% { transform: scaleX(.55); opacity: .12; }
-    46%      { transform: scaleX(1);   opacity: .3; }
+
+  @keyframes lean {
+    0%, 100% { transform: rotate(-4deg); }
+    46%      { transform: rotate(0deg); }
+    64%      { transform: rotate(3deg); }
   }
 
+  /* Tight and dark under the ball, wide and faint when it's up. */
+  @keyframes squash {
+    0%, 100% { transform: scale(.5, .7); opacity: .10; }
+    46%      { transform: scale(1, 1);   opacity: .32; }
+  }
+
+  @keyframes sign-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: .55; transform: none; }
+  }
+
+  /* Everything above is motion for its own sake, so none of it survives here —
+     but the pieces that animate their own way IN need their end state putting
+     back, or they'd simply never appear. */
   @media (prefers-reduced-motion: reduce) {
-    #splash .tile, #splash .shadow { animation: none; }
+    #splash .tile,
+    #splash .tile svg,
+    #splash .shadow,
+    #splash .by { animation: none; }
+    #splash .shadow { opacity: .22; }
+    #splash .by { opacity: .55; }
+    #splash.done { transform: none; }
   }
 </style>
 </head>
