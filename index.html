@@ -63,10 +63,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Same dark navy as the wallpaper's bottom edge and the manifest's
-       background_color, so the launch screen, the splash and the safe areas
-       iOS paints for itself are all one colour — nothing flashes white. */
-    background: linear-gradient(#06304f 0%, #021733 100%);
+    /* Brand yellow, and the manifest's background_color matches it, so the
+       launch screen iOS paints before the page exists is the same colour as the
+       page — nothing flashes between the two. */
+    background: linear-gradient(#ffe55c 0%, #ffc800 100%);
     /* The exit: the whole screen lifts away and fades, the way an app opens.
        Scaled here rather than on the tile so it composes with the dribble —
        stopping that animation mid-flight would snap the transform and jump. */
@@ -81,17 +81,16 @@
   }
   @keyframes splash-bail { to { opacity: 0; visibility: hidden; } }
 
-  /* The logo is black-on-yellow, so on a dark background it needs a light
-     surface. An iOS-style rounded tile is the natural one to give it here. */
+  /* No tile. The white one existed only because a black-on-yellow logo needs a
+     light surface to sit on, and on yellow it already has one — the dark disc
+     drawn behind the face is what keeps it from melting into the background.
+     This element is now just the thing that bounces. */
   #splash .tile {
-    width: 142px;
-    height: 142px;
-    border-radius: 22.5%;
-    background: #fff;
+    width: 152px;
+    height: 152px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
     /* Squash from the base, not the middle. A ball flattening against the floor
        keeps its contact point still; scaling about the centre makes it sink
        into the ground instead. */
@@ -104,9 +103,11 @@
                dribble 1.05s .42s infinite;
   }
   #splash .tile svg {
-    width: 78%;
-    height: 78%;
+    width: 100%;
+    height: 100%;
     display: block;
+    /* it used to borrow the tile's box-shadow; now it needs its own lift */
+    filter: drop-shadow(0 10px 16px rgba(120, 74, 0, .34));
     /* A lean into the bounce rather than a spin. A full rotation on a face
        reads as tumbling — this just gives it weight. */
     animation: lean 1.05s .42s ease-in-out infinite;
@@ -117,7 +118,7 @@
     height: 11px;
     margin-top: 13px;
     border-radius: 50%;
-    background: #000;
+    background: #6b4200;
     filter: blur(4px);
     /* Hidden until the tile has landed — a shadow with nothing above it is a
        smudge. The delay leaves it at this opacity until dribble takes over. */
@@ -130,7 +131,8 @@
     font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     letter-spacing: 2.6px;
     text-transform: uppercase;
-    color: #fff;
+    color: #16161a;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, .45), 0 2px 6px rgba(120, 74, 0, .28);
     opacity: 0;
     animation: sign-in .45s ease .52s forwards;
   }
@@ -164,13 +166,13 @@
 
   /* Tight and dark under the ball, wide and faint when it's up. */
   @keyframes squash {
-    0%, 100% { transform: scale(.5, .7); opacity: .10; }
-    46%      { transform: scale(1, 1);   opacity: .32; }
+    0%, 100% { transform: scale(.5, .7); opacity: .14; }
+    46%      { transform: scale(1, 1);   opacity: .40; }
   }
 
   @keyframes sign-in {
     from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: .55; transform: none; }
+    to   { opacity: .8; transform: none; }
   }
 
   /* Everything above is motion for its own sake, so none of it survives here —
@@ -182,7 +184,7 @@
     #splash .shadow,
     #splash .by { animation: none; }
     #splash .shadow { opacity: .22; }
-    #splash .by { opacity: .55; }
+    #splash .by { opacity: .8; }
     #splash.done { transform: none; }
   }
 </style>
