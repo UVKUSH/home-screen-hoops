@@ -8,8 +8,11 @@
 
 const SHARE_TEXT = 'Hold down the Search bar on this and watch what happens 🏀';
 
-// X gets its own wording — reusing the share text put the basketball in twice
-const X_TAGLINE = 'Hold down the Search bar and watch the phone fall apart.';
+// What the post has to do: say what the thing is, say what to DO with it (nobody
+// discovers a hold-to-break gesture on their own), and give a reason to pass it
+// on. The prank is the reason — it is what the whole page is for.
+const X_HOOK  = 'Looks exactly like an iPhone home screen — until you hold down the Search bar and every app icon turns into a basketball 🏀';
+const X_DARE  = 'Hand it to someone without telling them what happens.';
 
 export const SHARE_URL = () => location.origin + location.pathname;
 
@@ -22,23 +25,29 @@ export const SHARE_URL = () => location.origin + location.pathname;
  * @param {{score?: number, total?: number}} [result]  omitted before any game
  */
 export function xMessage({ score, total } = {}) {
-  return total
-    ? `I scored ${score}/${total} on Home Screen Hoops 🏀\n\n${X_TAGLINE}`
-    : `Home Screen Hoops 🏀\n\n${X_TAGLINE}`;
+  const brag = total ? `I got ${score}/${total}. ` : '';
+  return `${X_HOOK}\n\n${brag}${X_DARE}`;
 }
 
 /**
- * Copy the post and open X's composer, in that order, in one tap.
+ * Is this a device where the system share sheet is the better route?
  *
- * X drops the prefilled text often enough — the app in particular tends to —
- * that opening the composer alone leaves people staring at an empty box. So the
- * post goes on the clipboard first and they can paste it, whatever X does with
- * the parameters.
+ * Touch-primary and a real phone or tablet. Desktop Safari and Chrome both
+ * expose navigator.share, but there the intent URL opens a proper composer in a
+ * new tab, which is one step rather than two.
+ */
+function wantsShareSheet() {
+  return Boolean(navigator.share)
+    && navigator.maxTouchPoints > 0
+    && /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
+}
+
+/**
+ * Get the post in front of the player, by whichever route this device honours.
  *
- * Both calls have to be MADE inside the click and before anything is awaited:
- * iOS grants clipboard access for the gesture only, and a window.open that
- * happens after an await is a popup and gets blocked. Hence fire both, then
- * report afterwards.
+ * The post always lands on the clipboard first, whatever happens next. X drops
+ * prefilled text often enough that opening a composer alone can leave someone
+ * staring at an empty box, and a copy costs nothing.
  */
 export function shareOnX(result) {
   const body = xMessage(result);
@@ -46,8 +55,31 @@ export function shareOnX(result) {
 
   // the clipboard copy carries the link; nothing downstream will add it
   const copied = navigator.clipboard?.writeText(`${body}\n\n${link}`);
+  const say = (msg) => copied?.then(() => toast(msg)).catch(() => {});
 
-  const composer = 'https://x.com/intent/post'
+  /*
+   * On a phone, hand it to the system share sheet.
+   *
+   * x.com/intent/post is a WEB address. iOS treats it as a universal link and
+   * gives it to the X app, which opens it in its own in-app browser — so you
+   * land on the X website with no composer and none of the text. The share
+   * sheet is the only route that reaches the real composer, because it passes
+   * the post to the app as content rather than as a page to visit.
+   *
+   * Called straight from the click. navigator.share needs the gesture, and so
+   * does the clipboard write above, which is why neither is awaited first.
+   */
+  if (wantsShareSheet()) {
+    navigator.share({ text: body, url: link })
+      .catch(() => { /* dismissed, or no app took it — the copy is the backstop */ });
+    say('Copied too, in case you’d rather paste it');
+    return;
+  }
+
+  // Desktop: the web intent opens a real composer in a new tab. twitter.com
+  // rather than x.com — it is the older endpoint and the one still handled
+  // everywhere, and it redirects to x.com on its own.
+  const composer = 'https://twitter.com/intent/tweet'
     + `?text=${encodeURIComponent(body)}`
     + `&url=${encodeURIComponent(link)}`;
   // a new tab rather than replacing the game — on a home-screen web app that
@@ -56,11 +88,8 @@ export function shareOnX(result) {
 
   // Only ever claim what actually happened. With no clipboard at all — an
   // insecure origin, or an older browser — say nothing rather than lie about it.
-  copied
-    ?.then(() => toast(opened
-      ? 'Copied — paste it if X didn’t fill it in'
-      : 'Copied — open X and paste it'))
-    .catch(() => { /* refused; the composer is still open */ });
+  say(opened ? 'Copied — paste it if X didn’t fill it in'
+             : 'Copied — open X and paste it');
 }
 
 /** The plain link, through the system share sheet where there is one. */

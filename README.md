@@ -145,8 +145,23 @@ makes someone look twice and wonder whether the phone is actually fake.
 
 ## Sound
 
+**The intro sting does not play on an iPhone, and cannot be made to.** Tested on
+a real device: silent. iOS refuses audio that starts without a user gesture, and
+a loading screen has not had one yet — there is no flag, no trick, and no
+muted-autoplay path of the sort video gets. Anything that fixed it would mean
+putting a tap on the loading screen, which costs more than the sound is worth.
+
+So it is left as it is: it plays on desktop and on most Android, it is silent on
+iOS, and the rejected promise is caught so nothing else notices. Worth knowing if
+you test it in an automated browser and everything looks fine — those usually run
+with the autoplay policy switched off and will tell you it works.
+
+The bounce is timed to that audio regardless (see the splash section of
+[`index.html`](index.html)); the sync is what shapes the animation whether or not
+anyone hears it.
+
 Every sound in the *game* is synthesised — there are no audio files behind any
-of it. The one exception is the intro sting on the loading screen
+of it. The one exception is that intro sting
 (`assets/intro.mp3`, 51 KB), which is a recording. Everything else is made in
 [`js/sound.js`](js/sound.js) with the Web Audio API — a filtered noise burst for
 the net, inharmonic sine partials for the rim, a pitched thud for bounces.

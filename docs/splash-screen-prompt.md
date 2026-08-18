@@ -394,11 +394,16 @@ Call `stopIntro()` when the user starts doing something with sound of its own.
 1. **Put the sound somewhere that actually ships.** Check it is not inside a
    gitignored folder. It will work locally and 404 in production.
 
-2. **Autoplay is not guaranteed.** Browsers may refuse audio before the visitor
-   has touched anything, and mobile Safari always does. The rejection arrives as
-   a rejected promise — catch it and carry on. Never let a missing sound break
-   the screen. Test on a real phone; an automated browser usually has the policy
-   switched off and will tell you everything is fine.
+2. **On iOS the sound will not play at all. Confirmed on a real device.**
+   iOS refuses audio that starts without a user gesture, and a loading screen has
+   not had one. There is no flag and no trick; the only fix is putting a tap on
+   the loading screen, which usually costs more than the sound is worth. Catch
+   the rejected promise, carry on, and treat the sound as a bonus for the
+   platforms that allow it. Do not trust an automated browser here — they
+   normally run with the policy switched off and will report success.
+
+   Time the animation to the audio anyway. The sync is what gives the motion its
+   shape, and that survives whether or not anyone hears the track.
 
 3. **Match the platform launch colour to the splash background.** In
    `manifest.json` set `background_color` to the splash's colour. That is what
