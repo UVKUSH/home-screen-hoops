@@ -30,17 +30,19 @@ export function xMessage({ score, total } = {}) {
 }
 
 /**
- * Is this a device where the system share sheet is the better route?
+ * Is this a phone, where the X app may be installed to catch a URL scheme?
  *
- * Touch-primary and a real phone or tablet. Desktop Safari and Chrome both
- * expose navigator.share, but there the intent URL opens a proper composer in a
- * new tab, which is one step rather than two.
+ * Desktop is excluded deliberately: there the web intent opens a real composer
+ * in a new tab, which is already the shortest route.
+ *
+ * @param {object} [nav]  the environment; the tests pass their own
  */
-function wantsShareSheet() {
-  return Boolean(navigator.share)
-    && navigator.maxTouchPoints > 0
-    && /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
+export function isPhone(nav = navigator) {
+  return nav.maxTouchPoints > 0 && /iPhone|iPad|iPod|Android/.test(nav.userAgent);
 }
+
+/** The X app's own scheme. `post` opens the composer; `message` carries it all. */
+export const xAppUrl = (text) => `twitter://post?message=${encodeURIComponent(text)}`;
 
 /**
  * Get the post in front of the player, by whichever route this device honours.
@@ -58,20 +60,29 @@ export function shareOnX(result) {
   const say = (msg) => copied?.then(() => toast(msg)).catch(() => {});
 
   /*
-   * On a phone, hand it to the system share sheet.
+   * On a phone, go at the X app directly.
    *
-   * x.com/intent/post is a WEB address. iOS treats it as a universal link and
-   * gives it to the X app, which opens it in its own in-app browser — so you
-   * land on the X website with no composer and none of the text. The share
-   * sheet is the only route that reaches the real composer, because it passes
-   * the post to the app as content rather than as a page to visit.
+   * x.com/intent/post is a WEB address: iOS hands it to the X app as a universal
+   * link and the app opens it in its own in-app browser, so you arrive at the X
+   * website with no composer and none of the text. twitter:// is the app's own
+   * scheme — X still registers it — and `post` opens the composer itself, in one
+   * tap rather than two through the share sheet.
    *
-   * Called straight from the click. navigator.share needs the gesture, and so
-   * does the clipboard write above, which is why neither is awaited first.
+   * If the app isn't installed nothing happens and we are simply still here,
+   * which is what the timer below is for. It cannot fall back to
+   * navigator.share: that needs a user gesture, and by then the click is over.
+   * The clipboard copy made above is the backstop instead.
    */
-  if (wantsShareSheet()) {
-    navigator.share({ text: body, url: link })
-      .catch(() => { /* dismissed, or no app took it — the copy is the backstop */ });
+  if (isPhone()) {
+    const startedAt = Date.now();
+    location.href = xAppUrl(`${body}\n\n${link}`);
+
+    setTimeout(() => {
+      // backgrounded, or gone long enough to have left — the app took it
+      if (document.hidden || Date.now() - startedAt > 2200) return;
+      toast('X didn’t open — the post is copied, paste it anywhere');
+    }, 1000);
+
     say('Copied too, in case you’d rather paste it');
     return;
   }

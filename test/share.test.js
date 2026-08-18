@@ -50,3 +50,41 @@ test('the message carries no link of its own', () => {
     assert.doesNotMatch(msg, /https?:\/\//);
   }
 });
+
+// ── which route the post takes out ───────────────────────────────
+import { isPhone, xAppUrl } from '../js/share.js';
+
+const nav = (userAgent, maxTouchPoints = 5) => ({ userAgent, maxTouchPoints });
+
+test('phones and tablets get the app route', () => {
+  for (const ua of [
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36',
+  ]) assert.equal(isPhone(nav(ua)), true, ua.slice(0, 30));
+});
+
+// On desktop the web intent already opens a real composer in a new tab, which is
+// fewer steps than anything an app scheme could do.
+test('desktop keeps the web intent', () => {
+  assert.equal(isPhone(nav('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36', 0)), false);
+  assert.equal(isPhone(nav('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36', 0)), false);
+});
+
+// A touchscreen laptop is not a phone: no X app to catch the scheme, so firing
+// it would do nothing and the composer would never open.
+test('a touchscreen desktop is not treated as a phone', () => {
+  assert.equal(isPhone(nav('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36', 10)), false);
+});
+
+test('the app url opens the composer and carries the whole post', () => {
+  const url = xAppUrl('line one\n\nhttps://example.com/');
+  assert.ok(url.startsWith('twitter://post?message='), url);
+  assert.equal(decodeURIComponent(url.split('message=')[1]), 'line one\n\nhttps://example.com/');
+});
+
+// The scheme has no separate url parameter, so unlike the web intent the link
+// has to be inside the message or it is lost.
+test('the app url keeps the link, since the scheme has nowhere else to put it', () => {
+  assert.match(xAppUrl('post\n\nhttps://uvkush.github.io/home-screen-hoops/'), /uvkush\.github\.io/);
+});
