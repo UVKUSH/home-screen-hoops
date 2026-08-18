@@ -402,6 +402,12 @@ Call `stopIntro()` when the user starts doing something with sound of its own.
    platforms that allow it. Do not trust an automated browser here — they
    normally run with the policy switched off and will report success.
 
+   **Do not even construct the audio element on iOS.** Creating it claims the
+   audio session, which silences any `AudioContext` your app later opens — so a
+   sting that can never play will take the rest of your sound with it. Gate it
+   on a platform check, not on the play() rejection: by the time the promise
+   rejects, the damage is done.
+
    Time the animation to the audio anyway. The sync is what gives the motion its
    shape, and that survives whether or not anyone hears the track.
 

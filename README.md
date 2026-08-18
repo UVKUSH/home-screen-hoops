@@ -151,8 +151,12 @@ a loading screen has not had one yet — there is no flag, no trick, and no
 muted-autoplay path of the sort video gets. Anything that fixed it would mean
 putting a tap on the loading screen, which costs more than the sound is worth.
 
-So it is left as it is: it plays on desktop and on most Android, it is silent on
-iOS, and the rejected promise is caught so nothing else notices. Worth knowing if
+Worse than silent, in fact. Creating the audio element at all claims the iOS
+audio session, and that leaves the `AudioContext` every sound in the *game* runs
+through producing nothing — so a sting that could never play was costing all the
+audio that could. On iOS the element is therefore never created.
+
+Elsewhere it plays as normal, and a refusal is caught so nothing else notices. Worth knowing if
 you test it in an automated browser and everything looks fine — those usually run
 with the autoplay policy switched off and will tell you it works.
 

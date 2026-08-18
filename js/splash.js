@@ -1,4 +1,5 @@
 import { TUNE } from './config.js';
+import { detect } from './install.js';
 
 // The two images the home screen can't look right without.
 const NEEDED = ['assets/sprite.webp', 'assets/wallpaper.webp'];
@@ -7,6 +8,24 @@ const NEEDED = ['assets/sprite.webp', 'assets/wallpaper.webp'];
 // screen is wrong without it; nobody should ever be kept waiting on a sound.
 const INTRO = 'assets/intro.mp3';
 let intro = null;
+
+/**
+ * Is the sting worth attempting here?
+ *
+ * On iOS it is worse than useless. It cannot play — audio needs a user gesture
+ * and a loading screen has not had one — and merely creating the element claims
+ * the audio session, which leaves the AudioContext that every sound in the GAME
+ * runs through silent. One flourish that never plays, in exchange for all of the
+ * audio that does.
+ *
+ * detect() rather than a fresh regex: it already tells an iPad from a Mac by its
+ * touch points, and an iPad has the same audio session to lose.
+ *
+ * @param {object} [nav]  the environment; the tests pass their own
+ */
+export function introAllowed(nav = navigator) {
+  return !detect(nav).ios;
+}
 
 /**
  * The intro sting.
@@ -18,6 +37,7 @@ let intro = null;
  * doesn't happen and everything else carries on exactly as before.
  */
 function playIntro() {
+  if (!introAllowed()) return;
   try {
     intro = new Audio(INTRO);
     intro.volume = 0.55;
