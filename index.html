@@ -86,8 +86,8 @@
      drawn behind the face is what keeps it from melting into the background.
      This element is now just the thing that bounces. */
   #splash .tile {
-    width: 152px;
-    height: 152px;
+    width: 200px;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,13 +96,37 @@
        into the ground instead. */
     transform-origin: 50% 100%;
     will-change: transform;
-    /* Falls in first, then picks up the loop. The two never overlap — drop-in
-       has finished by the time dribble starts — so they can share `transform`
-       without fighting, and drop-in lands on exactly the pose dribble opens on,
-       which is what makes the handover invisible. */
-    animation: drop-in .42s cubic-bezier(.3, 0, .7, .5) both,
-               dribble 1.05s .42s infinite;
+    position: relative;
+    /* Timed off intro.mp3, measured rather than guessed. The track opens with
+       294ms of silence; its first and hardest attack is at 339ms and the next
+       at 728ms. So the ball falls through the silence and lands ON the first
+       hit, and the bounce period is the 389ms between the two — which is about
+       154 a minute, a real dribble tempo, so nothing had to be bent to fit.
+       drop-in ends on the floor squashed, which is exactly the pose dribble
+       now opens on, so the handover is invisible. */
+    animation: drop-in .339s cubic-bezier(.4, 0, .8, .55) both,
+               dribble .389s .339s infinite;
   }
+  /* The trail. A child of the tile, so it travels WITH the logo — anchored to
+     the thing that's moving and stretching back toward where it came from,
+     then catching up as it lands. Entrance only: the drop covers 156px and is
+     the one genuinely fast move, and streaking every bounce would be noise
+     inside a screen that lasts a second. */
+  #splash .tile::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 44%;
+    width: 38px;
+    margin-left: -19px;
+    height: 260px;
+    border-radius: 19px;
+    background: linear-gradient(rgba(92, 54, 0, 0), rgba(92, 54, 0, .20));
+    transform-origin: 50% 100%;
+    animation: streak .339s cubic-bezier(.4, 0, .8, .55) both;
+    pointer-events: none;
+  }
+
   #splash .tile svg {
     width: 100%;
     height: 100%;
@@ -111,74 +135,133 @@
     filter: drop-shadow(0 12px 18px rgba(92, 54, 0, .46));
     /* A lean into the bounce rather than a spin. A full rotation on a face
        reads as tumbling — this just gives it weight. */
-    animation: lean 1.05s .42s ease-in-out infinite;
+    animation: lean .389s .339s ease-in-out infinite;
   }
 
   #splash .shadow {
-    width: 104px;
-    height: 14px;
+    width: 136px;
+    height: 18px;
     /* Pulled up under the artwork rather than under the box. The face stops
        about three quarters of the way down its viewBox, so the svg's lower
        quarter is empty — measured from the box, the ball lands a clear 50px
        above its own shadow. */
-    margin-top: -34px;
+    margin-top: -45px;
     border-radius: 50%;
     background: #5c3600;
-    filter: blur(5px);
+    filter: blur(6px);
     will-change: transform, opacity;
     /* Hidden until the tile has landed — a shadow with nothing above it is a
        smudge. The delay leaves it at this opacity until dribble takes over. */
     opacity: 0;
-    animation: squash 1.05s .42s infinite;
+    animation: squash .389s .339s infinite;
   }
 
+  /* Zero-size and in normal flow, so it lands on the contact line at any screen
+     size without a measured offset to drift out of date. */
+  #splash .sparks {
+    position: relative;
+    width: 0;
+    height: 0;
+    margin-top: -18px;
+  }
+  #splash .sparks i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: #5c3600;
+    opacity: 0;
+    /* Same period and delay as the bounce, so the burst is pinned to the 46%
+       impact keyframe rather than drifting on a clock of its own. */
+    animation: spark .389s .339s infinite;
+    will-change: transform, opacity;
+  }
+  /* rotate-then-translate sends each one out along its own angle, which lets a
+     single keyframe block serve all six */
+  #splash .sparks i:nth-child(1) { --a: -114deg; --d: 68px; }
+  #splash .sparks i:nth-child(2) { --a:  -88deg; --d: 92px; }
+  #splash .sparks i:nth-child(3) { --a:  -63deg; --d: 74px; }
+  #splash .sparks i:nth-child(4) { --a:   63deg; --d: 76px; }
+  #splash .sparks i:nth-child(5) { --a:   88deg; --d: 94px; }
+  #splash .sparks i:nth-child(6) { --a:  114deg; --d: 66px; }
+
+  /* Down at the foot of the screen rather than tucked under the ball, so the
+     logo owns the middle. Absolute, so it also stops counting toward the
+     centring of the flex column above it.
+     env() rather than the --safe-b custom property: this stylesheet is inline
+     and paints before styles.css arrives, and a var() that isn't defined yet
+     would take the whole declaration down with it. */
   #splash .by {
-    margin-top: 30px;
-    font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 46px);
+    margin: 0;
+    text-align: center;
+    font: 800 13px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     letter-spacing: .22em;
     text-transform: uppercase;
-    color: #16161a;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, .45), 0 2px 6px rgba(120, 74, 0, .28);
+    color: #000;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, .4);
     opacity: 0;
-    animation: sign-in .45s ease .52s forwards;
+    animation: sign-in .4s ease .38s forwards;
   }
 
-  /* Arrives from above and hands over at the top of the first bounce. */
+  /* Falls through the track's opening silence and hits the floor on the beat. */
   @keyframes drop-in {
-    0%   { transform: translateY(-190px) scale(.9, 1.12); opacity: 0; }
-    55%  { opacity: 1; }
-    100% { transform: translateY(-34px) scale(1, 1); opacity: 1; }
+    0%   { transform: translateY(-250px) scale(.9, 1.14); opacity: 0; }
+    45%  { opacity: 1; }
+    86%  { transform: translateY(-24px) scale(.92, 1.11); opacity: 1;
+           animation-timing-function: cubic-bezier(.5, 0, .75, .6); }
+    100% { transform: translateY(0) scale(1.14, .85); opacity: 1; }
   }
 
   /* A dribble, not a drop: the height holds because a hand keeps putting the
      energy back. What sells it is the stretch on the way down and the fact that
      contact is nearly instant — most of the cycle is spent in the air. */
   @keyframes dribble {
-    0%   { transform: translateY(-34px) scale(1, 1);
-           animation-timing-function: cubic-bezier(.4, 0, .85, .5); }
-    36%  { transform: translateY(-8px) scale(.93, 1.09);
-           animation-timing-function: cubic-bezier(.8, 0, .9, .6); }
-    46%  { transform: translateY(0) scale(1.14, .85);
-           animation-timing-function: cubic-bezier(.05, .75, .35, 1); }
-    56%  { transform: translateY(-12px) scale(.95, 1.06); }
-    100% { transform: translateY(-34px) scale(1, 1); }
+    0%   { transform: translateY(0) scale(1.14, .85);
+           animation-timing-function: cubic-bezier(.05, .8, .3, 1); }
+    14%  { transform: translateY(-21px) scale(.95, 1.06); }
+    50%  { transform: translateY(-42px) scale(1, 1);
+           animation-timing-function: cubic-bezier(.4, 0, .8, .5); }
+    86%  { transform: translateY(-18px) scale(.94, 1.08); }
+    100% { transform: translateY(0) scale(1.14, .85); }
+  }
+
+  @keyframes streak {
+    0%   { transform: scaleY(1); opacity: .85; }
+    70%  { opacity: .5; }
+    100% { transform: scaleY(0); opacity: 0; }
+  }
+
+  /* Nothing until contact, then out and gone well before the next bounce. */
+  @keyframes spark {
+    0%   { transform: rotate(var(--a)) translateY(-6px) scale(1); opacity: .95; }
+    45%  { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(.25);
+           opacity: 0; }
+    100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(.25);
+           opacity: 0; }
   }
 
   @keyframes lean {
-    0%, 100% { transform: rotate(-4deg); }
-    46%      { transform: rotate(0deg); }
-    64%      { transform: rotate(3deg); }
+    0%, 100% { transform: rotate(0deg); }
+    30%      { transform: rotate(3deg); }
+    70%      { transform: rotate(-4deg); }
   }
 
   /* Tight and dark under the ball, wide and faint when it's up. */
   @keyframes squash {
-    0%, 100% { transform: scale(.58, .72); opacity: .24; }
-    46%      { transform: scale(1.06, 1);   opacity: .62; }
+    0%, 100% { transform: scale(1.06, 1);   opacity: .62; }
+    50%      { transform: scale(.58, .72); opacity: .24; }
   }
 
   @keyframes sign-in {
     from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: .8; transform: none; }
+    to   { opacity: 1; transform: none; }
   }
 
   @keyframes settle-in { from { opacity: 0; } to { opacity: 1; } }
@@ -194,9 +277,12 @@
     #splash .tile svg,
     #splash .shadow,
     #splash .by { animation: none; transform: none; }
+    /* decoration with nothing to say, so it simply doesn't happen */
+    #splash .tile::before,
+    #splash .sparks { display: none; }
     #splash .tile { animation: settle-in .32s ease both; transform: none; }
     #splash .shadow { opacity: .42; }
-    #splash .by { opacity: .8; }
+    #splash .by { opacity: 1; }
     #splash.done { transform: none; }
   }
 </style>
@@ -227,6 +313,9 @@
     </svg>
   </div>
   <div class="shadow"></div>
+  <!-- A zero-size point on the contact line. Not inside .tile or .shadow —
+       both are being scaled, and sparks that squash with the ball are wrong. -->
+  <div class="sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <p class="by">made by uv kush</p>
 </div>
 
