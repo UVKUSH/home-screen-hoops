@@ -191,7 +191,13 @@ When the last shot is gone you can **keep going**, share the score, or put your
 name up. Sharing offers two destinations for the same post: **Share on X** goes
 straight into the X app's composer via its own `twitter://` scheme, and
 **Share…** opens the system sheet for Messages, WhatsApp, Notes and the rest.
-The second only appears where the browser has a share sheet to open. Only the
+The second only appears where the browser has a share sheet to open.
+
+The post itself opens with **add this to your home screen**, not with the score.
+That is the thing worth converting on, and it is also the only way the gag works
+— in a browser tab the address bar gives it away on sight. Installed, there is no
+chrome at all. So the install line is the setup and the prank is what pays for
+it; the score goes last, because it means nothing to a stranger. Only the
 name appears on the board — the email or phone is stored privately and no API
 route ever reads it back out.
 

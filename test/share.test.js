@@ -14,7 +14,7 @@ test('with no game yet, it still reads as a post', () => {
   const msg = xMessage();
   assert.doesNotMatch(msg, /I got/);
   assert.doesNotMatch(msg, /undefined|NaN|null/);
-  assert.ok(msg.startsWith('Looks exactly like an iPhone home screen'));
+  assert.ok(msg.startsWith('Add this to your home screen'));
 });
 
 test('a zero-shot game is treated as no game, not as 0/0', () => {
@@ -25,16 +25,24 @@ test('scoring zero out of a real total is still a score', () => {
   assert.match(xMessage({ score: 0, total: 24 }), /I got 0\/24\./);
 });
 
-// The post has a job: say what the thing is, say what to do with it, and give a
-// reason to pass it on. Someone who reads it should know to hold the Search bar
-// without opening the link first — a share that needs explaining doesn't travel.
-test('every post says what it is, what to do, and why to pass it on', () => {
+// Installing is the thing worth converting on, and it is also the only way the
+// gag works — in a browser tab the address bar gives it away immediately. So the
+// post has to open with it, not bury it under a score.
+test('every post leads with adding it to the home screen', () => {
   for (const msg of [xMessage(), xMessage({ score: 3, total: 24 })]) {
-    assert.match(msg, /iPhone home screen/, 'says what it is');
-    assert.match(msg, /hold down the Search bar/i, 'says what to do');
-    assert.match(msg, /Hand it to someone/, 'gives a reason to pass it on');
+    assert.ok(msg.startsWith('Add this to your home screen'), 'leads with the install');
+    assert.match(msg, /hold down the Search bar/i, 'says what to do once installed');
+    assert.match(msg, /hand it to a friend/i, 'gives a reason to pass it on');
     assert.equal(msg.match(/hold down the Search bar/gi).length, 1, 'said once');
   }
+});
+
+// The score is the least important part: it means nothing to a stranger and it
+// is not what we want them to do. It goes last, or the ask gets buried.
+test('the score never comes before the ask', () => {
+  const msg = xMessage({ score: 17, total: 24 });
+  assert.ok(msg.indexOf('I got') > msg.indexOf('home screen'), 'install first');
+  assert.ok(msg.indexOf('I got') > msg.indexOf('Search bar'), 'gag before the brag');
 });
 
 test('a post still fits X with the link appended', () => {

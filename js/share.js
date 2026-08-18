@@ -6,11 +6,18 @@
  * they live here with the toast they both talk through.
  */
 
-// What the post has to do: say what the thing is, say what to DO with it (nobody
-// discovers a hold-to-break gesture on their own), and give a reason to pass it
-// on. The prank is the reason — it is what the whole page is for.
-const X_HOOK  = 'Looks exactly like an iPhone home screen — until you hold down the Search bar and every app icon turns into a basketball 🏀';
-const X_DARE  = 'Hand it to someone without telling them what happens.';
+/*
+ * The post leads with adding it to the home screen, because that is the thing
+ * worth converting on — and because the gag does not work any other way. In a
+ * browser tab, with an address bar across the top, it is obviously a web page.
+ * Installed, there is no chrome at all and it is indistinguishable from the
+ * phone it is imitating, which is the entire trick.
+ *
+ * So the install line is not an instruction the reader has to be talked into.
+ * It is the setup, and the prank is the punchline that pays for it.
+ */
+const X_INSTALL = 'Add this to your home screen first — no address bar, no tabs, it just looks like your phone.';
+const X_GAG     = 'Then hand it to a friend and tell them to hold down the Search bar 🏀';
 
 export const SHARE_URL = () => location.origin + location.pathname;
 
@@ -23,8 +30,8 @@ export const SHARE_URL = () => location.origin + location.pathname;
  * @param {{score?: number, total?: number}} [result]  omitted before any game
  */
 export function xMessage({ score, total } = {}) {
-  const brag = total ? `I got ${score}/${total}. ` : '';
-  return `${X_HOOK}\n\n${brag}${X_DARE}`;
+  const brag = total ? `\n\nI got ${score}/${total}.` : '';
+  return `${X_INSTALL}\n\n${X_GAG}${brag}`;
 }
 
 /**
