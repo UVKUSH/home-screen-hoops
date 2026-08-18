@@ -340,11 +340,23 @@ const MAX_MS = 4000;    // give up waiting and show the app anyway
 const INTRO = 'assets/intro.mp3';
 let intro = null;
 
+/**
+ * iOS is excluded before anything is constructed, not after play() fails.
+ * Creating the element claims the audio session, which silences any
+ * AudioContext the app opens later — so by the time the promise rejects, the
+ * damage is done. An iPad sends a Mac's user agent, hence the touch points.
+ */
+function introAllowed(nav = navigator) {
+  const iPadOS = nav.platform === 'MacIntel' && nav.maxTouchPoints > 1;
+  return !(/iPhone|iPad|iPod/.test(nav.userAgent) || iPadOS);
+}
+
 function playIntro() {
+  if (!introAllowed()) return;
   try {
     intro = new Audio(INTRO);
     intro.volume = 0.55;
-    intro.play().catch(() => { intro = null; });   // blocked; nothing to do
+    intro.play().catch(() => { intro = null; });   // refused elsewhere; fine
   } catch { intro = null; }
 }
 

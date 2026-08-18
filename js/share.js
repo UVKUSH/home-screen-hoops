@@ -1,9 +1,9 @@
 /**
  * Getting the game in front of someone else.
  *
- * Two routes out: the system share sheet for the plain link, and X for a score.
- * Neither belongs to the scorecard — the board screen could want them too — so
- * they live here with the toast they both talk through.
+ * One post, two destinations: straight into X's composer, or the system share
+ * sheet for everywhere else. Neither belongs to the scorecard — the board screen
+ * could want them too — so they live here with the toast they both talk through.
  */
 
 /*
