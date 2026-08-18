@@ -2,14 +2,15 @@ import { buildHomeScreen } from './homescreen.js';
 import { watchSpotlight } from './longpress.js';
 import { createGame } from './game.js';
 import { TUNE, HOME_SWIPE } from './config.js';
-import { runSplash } from './splash.js';
+import { runSplash, stopIntro } from './splash.js';
 import { wireInstallHelp, maybeShowInstall } from './install.js';
 import { startAnalytics } from './analytics.js';
 
 buildHomeScreen();
 runSplash();
 const game = createGame();
-watchSpotlight((origin) => game.breakPhone(origin));
+// the sting has no business still playing once the phone breaks
+watchSpotlight((origin) => { stopIntro(); game.breakPhone(origin); });
 
 // open with ?debug to poke at it from the console
 if (location.search.includes('debug')) window.hoops = game;

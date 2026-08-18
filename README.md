@@ -145,7 +145,9 @@ makes someone look twice and wonder whether the phone is actually fake.
 
 ## Sound
 
-There are no audio files. Every sound is synthesised in
+Every sound in the *game* is synthesised — there are no audio files behind any
+of it. The one exception is the intro sting on the loading screen
+(`assets/intro.mp3`, 51 KB), which is a recording. Everything else is made in
 [`js/sound.js`](js/sound.js) with the Web Audio API — a filtered noise burst for
 the net, inharmonic sine partials for the rim, a pitched thud for bounces.
 
@@ -250,7 +252,10 @@ composites any transparency onto black.
 
 ## Why it loads fast
 
-It's ~130 KB over 15 requests, and everything starts downloading at once.
+It's ~130 KB over 15 requests for the page itself, and everything starts
+downloading at once. The intro sting adds a 51 KB request on top, deliberately
+outside that set: the splash waits on artwork, because the home screen looks
+wrong without it, and never on a sound.
 
 | | before | after |
 | --- | --- | --- |
