@@ -70,7 +70,7 @@
     /* The exit: the whole screen lifts away and fades, the way an app opens.
        Scaled here rather than on the tile so it composes with the dribble —
        stopping that animation mid-flight would snap the transform and jump. */
-    transition: opacity .5s ease, transform .5s cubic-bezier(.36, 0, .2, 1);
+    transition: opacity .4s ease, transform .4s cubic-bezier(.32, .72, 0, 1);
     /* failsafe: if the scripts never run, don't trap anyone on a blank screen */
     animation: splash-bail 1ms linear 6s forwards;
   }
@@ -95,6 +95,7 @@
        keeps its contact point still; scaling about the centre makes it sink
        into the ground instead. */
     transform-origin: 50% 100%;
+    will-change: transform;
     /* Falls in first, then picks up the loop. The two never overlap — drop-in
        has finished by the time dribble starts — so they can share `transform`
        without fighting, and drop-in lands on exactly the pose dribble opens on,
@@ -124,6 +125,7 @@
     border-radius: 50%;
     background: #5c3600;
     filter: blur(5px);
+    will-change: transform, opacity;
     /* Hidden until the tile has landed — a shadow with nothing above it is a
        smudge. The delay leaves it at this opacity until dribble takes over. */
     opacity: 0;
@@ -133,7 +135,7 @@
   #splash .by {
     margin-top: 30px;
     font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    letter-spacing: 2.6px;
+    letter-spacing: .22em;
     text-transform: uppercase;
     color: #16161a;
     text-shadow: 0 1px 1px rgba(255, 255, 255, .45), 0 2px 6px rgba(120, 74, 0, .28);
@@ -179,14 +181,20 @@
     to   { opacity: .8; transform: none; }
   }
 
-  /* Everything above is motion for its own sake, so none of it survives here —
-     but the pieces that animate their own way IN need their end state putting
-     back, or they'd simply never appear. */
+  @keyframes settle-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Reduced motion asks for a gentler, non-vestibular equivalent — not for
+     nothing to happen. The bouncing, leaning and travelling all go; a plain
+     cross-fade stays, so the screen still reads as arriving rather than as a
+     still someone forgot to animate. The exit keeps its fade and drops its
+     scale, since the zoom is the vestibular half of it.
+     The two elements that fade themselves IN also need their end opacity
+     restored by hand, or they would never appear at all. */
   @media (prefers-reduced-motion: reduce) {
-    #splash .tile,
     #splash .tile svg,
     #splash .shadow,
-    #splash .by { animation: none; }
+    #splash .by { animation: none; transform: none; }
+    #splash .tile { animation: settle-in .32s ease both; transform: none; }
     #splash .shadow { opacity: .42; }
     #splash .by { opacity: .8; }
     #splash.done { transform: none; }
