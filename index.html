@@ -107,19 +107,23 @@
     height: 100%;
     display: block;
     /* it used to borrow the tile's box-shadow; now it needs its own lift */
-    filter: drop-shadow(0 10px 16px rgba(120, 74, 0, .34));
+    filter: drop-shadow(0 12px 18px rgba(92, 54, 0, .46));
     /* A lean into the bounce rather than a spin. A full rotation on a face
        reads as tumbling — this just gives it weight. */
     animation: lean 1.05s .42s ease-in-out infinite;
   }
 
   #splash .shadow {
-    width: 92px;
-    height: 11px;
-    margin-top: 13px;
+    width: 104px;
+    height: 14px;
+    /* Pulled up under the artwork rather than under the box. The face stops
+       about three quarters of the way down its viewBox, so the svg's lower
+       quarter is empty — measured from the box, the ball lands a clear 50px
+       above its own shadow. */
+    margin-top: -34px;
     border-radius: 50%;
-    background: #6b4200;
-    filter: blur(4px);
+    background: #5c3600;
+    filter: blur(5px);
     /* Hidden until the tile has landed — a shadow with nothing above it is a
        smudge. The delay leaves it at this opacity until dribble takes over. */
     opacity: 0;
@@ -166,8 +170,8 @@
 
   /* Tight and dark under the ball, wide and faint when it's up. */
   @keyframes squash {
-    0%, 100% { transform: scale(.5, .7); opacity: .14; }
-    46%      { transform: scale(1, 1);   opacity: .40; }
+    0%, 100% { transform: scale(.58, .72); opacity: .24; }
+    46%      { transform: scale(1.06, 1);   opacity: .62; }
   }
 
   @keyframes sign-in {
@@ -183,7 +187,7 @@
     #splash .tile svg,
     #splash .shadow,
     #splash .by { animation: none; }
-    #splash .shadow { opacity: .22; }
+    #splash .shadow { opacity: .42; }
     #splash .by { opacity: .8; }
     #splash.done { transform: none; }
   }
